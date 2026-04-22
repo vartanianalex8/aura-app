@@ -1,0 +1,127 @@
+.comments-section {
+  padding: 8px 16px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.comment-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.comment-input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 20px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.comment-input::placeholder { color: var(--text-muted); }
+
+.comment-send {
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.comment-error {
+  font-size: 11px;
+  color: #e55;
+  margin-bottom: 6px;
+}
+
+.comment-gate {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 12px 0;
+  font-style: italic;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.comment-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+  font-size: 13px;
+}
+
+.comment-author {
+  font-weight: 600;
+}
+
+.comment-text {
+  color: var(--text-primary);
+}
+
+.comment-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.comments-loading {
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.comment-gif-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gif-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.gif-option {
+  aspect-ratio: 1.5;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--bg-tertiary);
+  border: none;
+  padding: 0;
+}
+
+.gif-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.comment-gif {
+  max-width: 120px;
+  border-radius: 6px;
+  margin-top: 2px;
+}
+
+.comment-mention {
+  color: var(--accent);
+  font-weight: 600;
+}

@@ -1,0 +1,189 @@
+.search-screen {
+  padding: 20px 16px;
+}
+
+.search-header h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  margin-bottom: 16px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: var(--input-bg);
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.search-bar input {
+  flex: 1;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.search-bar input::placeholder { color: var(--text-muted); }
+
+.search-status {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 20px;
+}
+
+.search-section {
+  margin-bottom: 24px;
+}
+
+.search-section h3 {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.search-user-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.search-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.search-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.search-avatar-ph { width: 100%; height: 100%; background: var(--bg-tertiary); border-radius: 50%; }
+
+.search-username { font-weight: 600; font-size: 14px; }
+.search-streak { font-size: 12px; color: var(--text-muted); }
+
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.search-grid-item {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-tertiary);
+}
+
+.search-grid-item img { width: 100%; height: 100%; object-fit: cover; }
+
+.search-text-post {
+  padding: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.search-empty {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.trending-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trending-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.trending-chip:hover { background: var(--accent); color: #fff; }
+
+.trending-count {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.search-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.search-user-info { flex: 1; }
+
+.follow-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  transition: all var(--transition);
+}
+
+.follow-btn.following {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.search-results {
+  padding: 0 16px;
+}
+
+.search-chevron {
+  font-size: 20px;
+  color: var(--text-muted);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.search-user-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  transition: opacity 0.15s;
+}
+
+.search-user-row:hover {
+  opacity: 0.8;
+}
+
+.search-user-row:last-child {
+  border-bottom: none;
+}
+
+.search-status {
+  padding: 20px 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}

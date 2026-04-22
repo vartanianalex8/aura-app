@@ -1,0 +1,220 @@
+.post-screen {
+  padding: 20px 16px;
+  min-height: 100%;
+}
+
+.post-screen--done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+
+.post-done-icon { font-size: 48px; margin-bottom: 8px; }
+.post-screen--done h2 { font-family: var(--font-display); font-size: 22px; color: var(--text-primary); }
+.post-screen--done p { font-size: 14px; }
+
+.post-screen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 20px;
+}
+
+.post-screen-header h2 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.post-step-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.post-error {
+  font-size: 12px;
+  color: #e55;
+  background: rgba(238,85,85,0.08);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+}
+
+/* Capture */
+.post-capture { display: flex; flex-direction: column; gap: 16px; }
+
+.capture-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 300px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+
+.capture-area:hover { border-color: var(--accent); }
+.capture-area p { font-size: 15px; font-weight: 500; }
+.capture-area span { font-size: 12px; }
+
+.skip-btn {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* Preview */
+.post-preview { display: flex; flex-direction: column; gap: 16px; }
+
+.preview-img-wrap {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.preview-img-wrap img {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+}
+
+.preview-remove {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Config */
+.post-config { display: flex; flex-direction: column; gap: 14px; }
+
+.config-thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.config-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-caption-input {
+  width: 100%;
+  min-height: 100px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  resize: vertical;
+  border: 1px solid transparent;
+  transition: border-color var(--transition);
+}
+
+.post-caption-input:focus { border-color: var(--accent); }
+.post-caption-input::placeholder { color: var(--text-muted); }
+
+.char-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: -8px;
+}
+
+.hashtag-row {
+  display: flex;
+  gap: 8px;
+}
+
+.hashtag-row .auth-input { flex: 1; }
+
+.tag-add-btn {
+  width: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.hashtag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hashtag-chip {
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.location-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.location-row .auth-input { flex: 1; }
+
+.category-picker { margin-bottom: 4px; }
+
+.category-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.category-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.category-chip {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.category-chip.active {
+  background: var(--accent);
+  color: #fff;
+}

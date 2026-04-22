@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-display-weight: 500;
+  --max-width: 430px;
+  --nav-height: 64px;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+}
+
+input, button, textarea {
+  font-family: var(--font-body);
+  border: none;
+  outline: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 0; }
+
+/* Desktop optimization */
+@media (min-width: 768px) {
+  .app-shell {
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .bottom-nav {
+    border-radius: 0;
+  }
+
+  .side-drawer {
+    border-right: 1px solid var(--border);
+  }
+}
+
+@media (min-width: 1024px) {
+  #root {
+    background: var(--bg-tertiary);
+    align-items: stretch;
+  }
+
+  .app-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    border-radius: 0;
+  }
+}
+
+/* Background overlay */
+.app-content::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay, none);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app-content > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Landscape */
+@media (orientation: landscape) and (max-height: 500px) {
+  .bottom-nav {
+    height: 48px;
+    padding-bottom: 0;
+  }
+
+  .nav-item span {
+    display: none;
+  }
+
+  .nav-item--post { margin-top: 0; }
+
+  .post-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .app-content {
+    padding-bottom: 48px;
+  }
+}
+
+@media (orientation: landscape) {
+  .app-shell {
+    max-width: 100%;
+  }
+
+  .post-image {
+    aspect-ratio: 16/9;
+  }
+}
