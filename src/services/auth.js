@@ -89,11 +89,10 @@ export const authService = {
     const user = Parse.User.current();
     if (!user) return null;
     const json = user.toJSON();
-    // Normalize profilePicture to always be { url: string } or null
-    const pic = user.get('profilePicture');
-    const picUrl = pic
-      ? (typeof pic.url === 'function' ? pic.url() : pic?.url || null)
-      : (json.profilePicture?.url || null);
+    // toJSON() serializes Parse.File as { __type, name, url }
+    // Normalize to always be { url: string } or null so components can do user.profilePicture?.url
+    const rawPic = json.profilePicture;
+    const picUrl = rawPic?.url || null;
     json.profilePicture = picUrl ? { url: picUrl } : null;
     return json;
   },

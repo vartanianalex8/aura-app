@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/auth';
+import Parse from '../services/parse';
 
 const AuthContext = createContext(null);
 
@@ -11,6 +12,13 @@ export function AuthProvider({ children }) {
     const current = authService.getCurrentUser();
     setUser(current);
     setLoading(false);
+
+    // Fetch fresh from server in background so file URLs (profile pic) are always populated
+    if (current) {
+      Parse.User.current()?.fetch()
+        .then(() => setUser(authService.getCurrentUser()))
+        .catch(() => {});
+    }
   }, []);
 
   const signUp = async (username, email, password) => {
