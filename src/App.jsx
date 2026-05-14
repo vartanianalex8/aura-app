@@ -14,7 +14,6 @@ import ProfileScreen from './screens/ProfileScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import ChangelogScreen from './screens/ChangelogScreen';
 import SavedScreen from './screens/SavedScreen';
-import LeaderboardScreen from './screens/LeaderboardScreen';
 import HashtagScreen from './screens/HashtagScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
 import './styles/global.css';
@@ -75,7 +74,6 @@ function AppRoutes() {
         <Route path={ROUTES.SETTINGS} element={<SettingsScreen />} />
         <Route path={ROUTES.CHANGELOG} element={<ChangelogScreen />} />
         <Route path="/saved" element={<SavedScreen />} />
-        <Route path="/leaderboard" element={<LeaderboardScreen />} />
         <Route path="/hashtag/:tag" element={<HashtagScreen />} />
         <Route path="/user/:userId" element={<UserProfileScreen />} />
         <Route path="/help" element={<div style={{padding:20,color:'var(--text-secondary)'}}>Help Center — Coming Soon</div>} />

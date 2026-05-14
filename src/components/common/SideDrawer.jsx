@@ -1,12 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { X, BookmarkIcon, Trophy, FileText, HelpCircle, Settings } from 'lucide-react';
+import { X, BookmarkIcon, FileText, HelpCircle, Settings } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { ROUTES } from '../../constants/routes';
 import './SideDrawer.css';
 
 const MENU_ITEMS = [
   { icon: BookmarkIcon, label: 'Saved Posts', route: '/saved' },
-  { icon: Trophy, label: 'Leaderboard', route: '/leaderboard' },
   { icon: Settings, label: 'Settings', route: ROUTES.SETTINGS },
   { icon: FileText, label: 'Patch Notes', route: ROUTES.CHANGELOG },
   { icon: HelpCircle, label: 'Help Center', route: '/help' },
