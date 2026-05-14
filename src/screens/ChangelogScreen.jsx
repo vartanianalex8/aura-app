@@ -4,6 +4,21 @@ import './ChangelogScreen.css';
 
 const VERSIONS = [
   {
+    version: '1.6.2',
+    date: 'May 14, 2026',
+    title: 'Bug Fix Sweep',
+    changes: [
+      { type: 'fix', text: 'Comment word limit now correctly enforces 50 words — backend was still blocking at 10 words even though the UI said 50' },
+      { type: 'fix', text: '"Popular" sort now actually sorts by most reactions — it was sorting by date (same as Latest)' },
+      { type: 'fix', text: 'Side drawer now shows your profile picture correctly and displays the right version number' },
+      { type: 'fix', text: 'Comment author avatars now display correctly in the comment section' },
+      { type: 'fix', text: 'Tapping a notification now navigates to that person\'s profile instead of just going to the home feed' },
+      { type: 'fix', text: 'Notification items now show the sender\'s profile picture' },
+      { type: 'fix', text: 'Posts in hashtag pages now show correct reaction and comment counts' },
+      { type: 'fix', text: 'Removed broken Help Center link from the side drawer' },
+    ],
+  },
+  {
     version: '1.6.1',
     date: 'May 14, 2026',
     title: 'Polish & Anti-Spam',

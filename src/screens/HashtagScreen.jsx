@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Hash } from 'lucide-react';
+import { postService } from '../services/posts';
 import Parse from '../services/parse';
 import PostCard from '../components/feed/PostCard';
 import './HashtagScreen.css';
@@ -11,9 +12,7 @@ export default function HashtagScreen() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    load();
-  }, [tag]);
+  useEffect(() => { load(); }, [tag]);
 
   const load = async () => {
     setLoading(true);
@@ -25,14 +24,10 @@ export default function HashtagScreen() {
       query.include('author');
       query.limit(50);
       const results = await query.find();
-      setPosts(results.map((p) => ({
-        ...p.toJSON(),
-        authorData: {
-          objectId: p.get('author')?.id,
-          username: p.get('authorUsername') || p.get('author')?.get('username') || 'unknown',
-          profilePicture: p.get('authorProfilePic') || p.get('author')?.get('profilePicture')?.url() || null,
-        },
-      })));
+      // Use _enrichPosts so reaction counts, comment counts and user reactions all load correctly
+      const currentUser = Parse.User.current();
+      const enriched = await postService._enrichPosts(results, currentUser);
+      setPosts(enriched);
     } catch (err) {
       console.error(err);
     } finally {

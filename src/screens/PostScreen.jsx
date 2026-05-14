@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, X, MapPin, ImagePlus } from 'lucide-react';
+import { X, MapPin, ImagePlus } from 'lucide-react';
 import { postService } from '../services/posts';
 import { POST_RULES, POST_CATEGORIES } from '../constants/config';
 import { ROUTES } from '../constants/routes';

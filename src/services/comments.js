@@ -21,13 +21,14 @@ export const commentService = {
     const isGif = text.trim().startsWith('[gif:');
     if (!isGif) {
       const wordCount = text.trim().split(/\s+/).length;
-      if (wordCount > 10) throw new Error('Comments must be 10 words or fewer');
+      if (wordCount > 50) throw new Error('Comments must be 50 words or fewer');
     }
 
     const comment = new Comment();
     comment.set('post', Post.createWithoutData(postId));
     comment.set('author', user);
     comment.set('authorUsername', user.get('username'));
+    comment.set('authorProfilePicUrl', user.get('profilePictureUrl') || null);
     comment.set('text', text.trim());
 
     if (parentCommentId) {
@@ -57,7 +58,7 @@ export const commentService = {
         authorData: {
           objectId: author?.id,
           username: c.get('authorUsername') || author?.get('username') || 'unknown',
-          profilePicture: author?.get('profilePicture')?.url() || null,
+          profilePicture: c.get('authorProfilePicUrl') || author?.get('profilePictureUrl') || null,
         },
       };
     });

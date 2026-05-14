@@ -255,7 +255,7 @@ export const postService = {
     switch (sort) {
       case 'recent': query.descending('createdAt'); break;
       case 'oldest': query.ascending('createdAt'); break;
-      case 'popular': query.descending('createdAt'); break;
+      case 'popular': query.descending('totalReactions'); break;
       default: query.descending('createdAt');
     }
 
@@ -338,6 +338,14 @@ export const postService = {
       const t = r.get('type');
       counts[t] = (counts[t] || 0) + 1;
     });
+
+    // Write totalReactions back to the post so feed can sort by it
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    try {
+      const postObj = Post.createWithoutData(postId);
+      postObj.set('totalReactions', total);
+      await postObj.save();
+    } catch { /* non-critical */ }
 
     return { counts, userReaction };
   },

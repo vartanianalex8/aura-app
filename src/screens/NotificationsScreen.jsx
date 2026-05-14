@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Parse from '../services/parse';
 import { notificationService } from '../services/notifications';
 import { timeAgo } from '../utils/helpers';
 import './NotificationsScreen.css';
+
+const UserIndex = Parse.Object.extend('UserIndex');
 
 const TYPE_CONFIG = {
   reaction: { emoji: '❤️', label: 'reacted to your post' },
@@ -12,18 +15,29 @@ const TYPE_CONFIG = {
 
 export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState([]);
+  const [avatars, setAvatars] = useState({});
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   const load = async () => {
     try {
       const data = await notificationService.getMyNotifications();
       setNotifications(data);
       await notificationService.markAllRead();
+
+      // Fetch avatars from UserIndex for all unique senders
+      const uniqueIds = [...new Set(data.map((n) => n.fromUserId).filter(Boolean))];
+      if (uniqueIds.length > 0) {
+        const q = new Parse.Query(UserIndex);
+        q.containedIn('userId', uniqueIds);
+        q.limit(uniqueIds.length);
+        const results = await q.find().catch(() => []);
+        const map = {};
+        results.forEach((r) => { map[r.get('userId')] = r.get('profilePictureUrl') || null; });
+        setAvatars(map);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -32,8 +46,7 @@ export default function NotificationsScreen() {
   };
 
   const handleTap = (n) => {
-    if (n.postId) navigate(`/`); // navigate to home — full post deep-link is a future improvement
-    else if (n.fromUserId) navigate(`/user/${n.fromUserId}`);
+    if (n.fromUserId) navigate(`/user/${n.fromUserId}`);
   };
 
   return (
@@ -53,18 +66,23 @@ export default function NotificationsScreen() {
         <div className="notifications-list">
           {notifications.map((n) => {
             const config = TYPE_CONFIG[n.type] || { emoji: '🔔', label: '' };
+            const avatarUrl = avatars[n.fromUserId] || null;
             return (
               <div
                 key={n.objectId}
                 className={`notification-item ${!n.read ? 'unread' : ''}`}
                 onClick={() => handleTap(n)}
               >
-                <div className="notification-emoji">{config.emoji}</div>
+                <div className="notification-avatar">
+                  {avatarUrl
+                    ? <img src={avatarUrl} alt="" />
+                    : <div className="notification-avatar-ph">{config.emoji}</div>}
+                </div>
                 <div className="notification-body">
                   <p className="notification-text">
                     <span className="notification-actor">@{n.fromUsername}</span>
                     {' '}{config.label}
-                    {n.message ? ` · "${n.message}"` : ''}
+                    {n.message ? <span className="notification-preview"> · "{n.message}"</span> : ''}
                   </p>
                   <span className="notification-time">{timeAgo(n.createdAt)}</span>
                 </div>

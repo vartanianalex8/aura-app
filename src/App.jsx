@@ -78,7 +78,6 @@ function AppRoutes() {
         <Route path="/notifications" element={<NotificationsScreen />} />
         <Route path="/hashtag/:tag" element={<HashtagScreen />} />
         <Route path="/user/:userId" element={<UserProfileScreen />} />
-        <Route path="/help" element={<div style={{padding:20,color:'var(--text-secondary)'}}>Help Center — Coming Soon</div>} />
       </Route>
     </Routes>
   );
