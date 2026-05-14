@@ -42,7 +42,6 @@ export default function SearchScreen() {
   const [trending, setTrending] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
   const [recentSearches, setRecentSearches] = useState(getRecentSearches());
   const navigate = useNavigate();
   const debounceRef = useRef(null);
@@ -159,7 +158,7 @@ export default function SearchScreen() {
 
   const handleClearAll = () => { clearRecentSearches(); setRecentSearches([]); };
 
-  const showRecent = isFocused && !query.trim() && recentSearches.length > 0;
+  const showRecent = !query.trim() && !searched && recentSearches.length > 0;
   const showDefault = !searched && !showRecent;
 
   return (
@@ -176,8 +175,6 @@ export default function SearchScreen() {
           value={query}
           onChange={(e) => handleInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setTimeout(() => setIsFocused(false), 150)}
           autoComplete="off"
         />
         {query && (
