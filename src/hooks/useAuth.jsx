@@ -13,10 +13,21 @@ export function AuthProvider({ children }) {
     setUser(current);
     setLoading(false);
 
-    // Fetch fresh from server in background so file URLs (profile pic) are always populated
+    // Fetch fresh from server so file URLs (profile pic) are always populated
     if (current) {
       Parse.User.current()?.fetch()
-        .then(() => setUser(authService.getCurrentUser()))
+        .then((freshUser) => {
+          // Migrate: if they have a profilePicture file but no profilePictureUrl string, set it
+          const pic = freshUser.get('profilePicture');
+          if (pic && !freshUser.get('profilePictureUrl')) {
+            const url = typeof pic.url === 'function' ? pic.url() : pic?.url;
+            if (url) {
+              freshUser.set('profilePictureUrl', url);
+              freshUser.save().catch(() => {});
+            }
+          }
+          setUser(authService.getCurrentUser());
+        })
         .catch(() => {});
     }
   }, []);

@@ -89,10 +89,8 @@ export const authService = {
     const user = Parse.User.current();
     if (!user) return null;
     const json = user.toJSON();
-    // toJSON() serializes Parse.File as { __type, name, url }
-    // Normalize to always be { url: string } or null so components can do user.profilePicture?.url
-    const rawPic = json.profilePicture;
-    const picUrl = rawPic?.url || null;
+    // Prefer the plain string field set on upload — never depends on Parse.File serialization
+    const picUrl = json.profilePictureUrl || json.profilePicture?.url || null;
     json.profilePicture = picUrl ? { url: picUrl } : null;
     return json;
   },
@@ -113,8 +111,10 @@ export const authService = {
   async uploadProfilePicture(file) {
     const parseFile = new Parse.File(file.name, file);
     await parseFile.save();
+    const picUrl = parseFile.url(); // grab URL immediately while the file object is fresh
     const user = Parse.User.current();
     user.set('profilePicture', parseFile);
+    user.set('profilePictureUrl', picUrl); // plain string — never depends on File serialization
     await user.save();
     await syncUserIndex(user);
     return user.toJSON();
