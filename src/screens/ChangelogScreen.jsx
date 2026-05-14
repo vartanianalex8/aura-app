@@ -4,6 +4,20 @@ import './ChangelogScreen.css';
 
 const VERSIONS = [
   {
+    version: '1.6.1',
+    date: 'May 14, 2026',
+    title: 'Polish & Anti-Spam',
+    changes: [
+      { type: 'new', text: 'One deletion per day — you can only delete a post once per day to prevent delete-and-repost spam' },
+      { type: 'improved', text: 'Search results now appear as you type — no need to press Enter or tap a button' },
+      { type: 'improved', text: 'Recent searches now show the actual person\'s profile picture and name — tapping goes directly to their profile' },
+      { type: 'improved', text: 'Trending hashtags and recent searches appear immediately when opening the Search tab' },
+      { type: 'improved', text: 'Text-only posts in the profile grid now use dynamic font sizing — short posts are big and bold, longer ones scale down to fit' },
+      { type: 'fix', text: 'Profile picture now correctly displays on your own profile screen' },
+      { type: 'fix', text: 'Removed category emoji badge from post cards (was showing 📸 on every post)' },
+    ],
+  },
+  {
     version: '1.6.0',
     date: 'May 14, 2026',
     title: 'The Social Overhaul',
