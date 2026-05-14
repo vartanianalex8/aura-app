@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Flame, UserPlus, UserCheck } from 'lucide-react';
+import { ChevronLeft, Flame, UserPlus, UserCheck, X } from 'lucide-react';
 import { postService } from '../services/posts';
 import { socialService } from '../services/social';
+import { notificationService } from '../services/notifications';
 import Parse from '../services/parse';
 import { useAuth } from '../hooks/useAuth';
 import { timeAgo } from '../utils/helpers';
+import { REACTION_EMOJIS } from '../constants/config';
 import '../screens/ProfileScreen.css';
-import '../screens/UserProfileScreen.css';
 import './UserProfileScreen.css';
 
 const UserIndex = Parse.Object.extend('UserIndex');
@@ -18,12 +19,13 @@ export default function UserProfileScreen() {
   const navigate = useNavigate();
 
   const [profileUser, setProfileUser] = useState(null);
-  const [todayPost, setTodayPost] = useState(null);
   const [allPosts, setAllPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [following, setFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   const isOwnProfile = currentUser?.objectId === userId;
 
@@ -35,7 +37,6 @@ export default function UserProfileScreen() {
   const loadProfile = async () => {
     setLoading(true);
     try {
-      // Load user info from UserIndex (public read — no CLP issues)
       const idxQuery = new Parse.Query(UserIndex);
       idxQuery.equalTo('userId', userId);
       const idx = await idxQuery.first();
@@ -51,23 +52,17 @@ export default function UserProfileScreen() {
         });
       }
 
-      // Load posts (uses pointer, no _User fetch needed)
       const posts = await postService.getUserPosts(userId);
       setAllPosts(posts);
 
-      // Find today's post
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todays = posts.find((p) => new Date(p.createdAt) >= today);
-      setTodayPost(todays || null);
-
-      // Follow state + follower count
-      const [isFollowing, fc] = await Promise.all([
+      const [isFollowing, fc, fwc] = await Promise.all([
         socialService.isFollowing(userId).catch(() => false),
         socialService.getFollowerCount(userId).catch(() => 0),
+        socialService.getFollowingCount(userId).catch(() => 0),
       ]);
       setFollowing(isFollowing);
       setFollowerCount(fc);
+      setFollowingCount(fwc);
     } catch (err) {
       console.error('[Aura] Error loading profile:', err);
     } finally {
@@ -86,6 +81,7 @@ export default function UserProfileScreen() {
         await socialService.follow(userId);
         setFollowing(true);
         setFollowerCount((c) => c + 1);
+        notificationService.create({ toUserId: userId, type: 'follow' }).catch(() => {});
       }
     } catch (err) {
       console.error(err);
@@ -118,28 +114,44 @@ export default function UserProfileScreen() {
     );
   }
 
+  // Check if they've posted today
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const postedToday = allPosts.some((p) => new Date(p.createdAt) >= today);
+
   return (
     <div className="profile-screen">
       <header className="profile-header">
         <button className="back-btn" onClick={() => navigate(-1)}><ChevronLeft size={20} /></button>
-        <h2>{profileUser.username}</h2>
+        <h2>@{profileUser.username}</h2>
       </header>
 
-      {/* Profile card */}
-      <div className="user-profile-card">
-        <div className="user-profile-avatar-wrap">
+      <div className="profile-card">
+        <div className="profile-pic-wrap">
           {profileUser.profilePictureUrl
             ? <img src={profileUser.profilePictureUrl} alt="" className="profile-pic" />
             : <div className="profile-pic-placeholder" />}
+          {postedToday && <span className="user-posted-today-dot" title="Posted today">✦</span>}
         </div>
+        <h3 className="profile-name">@{profileUser.username}</h3>
+        {profileUser.bio && <p className="profile-bio">{profileUser.bio}</p>}
 
-        <div className="user-profile-info">
-          <p className="user-profile-username">{profileUser.username}</p>
-          {profileUser.bio && <p className="user-profile-bio">{profileUser.bio}</p>}
-          <div className="user-profile-stats">
-            <span><Flame size={13} /> {profileUser.streakCount} day streak</span>
-            <span>· {followerCount} followers</span>
-            <span>· {allPosts.length} posts</span>
+        <div className="profile-stats">
+          <div className="stat">
+            <Flame size={16} />
+            <span className="stat-num">{profileUser.streakCount}</span>
+            <span className="stat-label">Streak</span>
+          </div>
+          <div className="stat">
+            <span className="stat-num">{allPosts.length}</span>
+            <span className="stat-label">Posts</span>
+          </div>
+          <div className="stat">
+            <span className="stat-num">{followerCount}</span>
+            <span className="stat-label">Followers</span>
+          </div>
+          <div className="stat">
+            <span className="stat-num">{followingCount}</span>
+            <span className="stat-label">Following</span>
           </div>
         </div>
 
@@ -147,40 +159,58 @@ export default function UserProfileScreen() {
           className={`profile-follow-btn ${following ? 'following' : ''}`}
           onClick={handleFollow}
           disabled={followLoading}
-          style={{ marginTop: '0.75rem', alignSelf: 'stretch' }}
         >
           {following ? <><UserCheck size={15} /> Following</> : <><UserPlus size={15} /> Follow</>}
         </button>
       </div>
 
-      {/* Today's post */}
-      <div className="user-profile-today">
-        <h3 className="user-profile-section-title">Today's moment</h3>
-        {todayPost ? (
-          <div className="user-profile-post">
-            {todayPost.image && (
-              <div className="user-profile-post-img">
-                <img src={todayPost.image.url} alt="" />
-              </div>
-            )}
-            {todayPost.caption && (
-              <p className="user-profile-post-caption">{todayPost.caption}</p>
-            )}
-            {todayPost.hashtags?.length > 0 && (
-              <div className="user-profile-post-tags">
-                {todayPost.hashtags.map((t) => (
-                  <span key={t} className="post-tag" onClick={() => navigate(`/hashtag/${t}`)}>#{t}</span>
-                ))}
-              </div>
-            )}
-            <p className="user-profile-post-time">{timeAgo(todayPost.createdAt)}</p>
-          </div>
+      {/* Full post grid */}
+      <div className="profile-grid">
+        {allPosts.length === 0 ? (
+          <p className="profile-loading">{profileUser.username} hasn't posted yet</p>
         ) : (
-          <p className="user-profile-no-post">
-            {profileUser.username} hasn't posted today yet
-          </p>
+          allPosts.map((p) => (
+            <div key={p.objectId} className="profile-grid-item" onClick={() => setSelectedPost(p)}>
+              {p.image
+                ? <img src={p.image.url} alt="" />
+                : <div className="profile-text-post">{p.caption?.slice(0, 50)}</div>}
+            </div>
+          ))
         )}
       </div>
+
+      {/* Post detail modal */}
+      {selectedPost && (
+        <div className="post-modal-overlay" onClick={() => setSelectedPost(null)}>
+          <div className="post-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="post-modal-close" onClick={() => setSelectedPost(null)}>
+              <X size={20} />
+            </button>
+            {selectedPost.image && (
+              <div className="post-modal-img"><img src={selectedPost.image.url} alt="" /></div>
+            )}
+            <div className="post-modal-body">
+              {selectedPost.caption && <p className="post-modal-caption">{selectedPost.caption}</p>}
+              {selectedPost.hashtags?.length > 0 && (
+                <p className="post-modal-tags">
+                  {selectedPost.hashtags.map((t) => (
+                    <span key={t} className="post-tag" onClick={() => { setSelectedPost(null); navigate(`/hashtag/${t}`); }}>#{t} </span>
+                  ))}
+                </p>
+              )}
+              <p className="post-modal-time">{timeAgo(selectedPost.createdAt)}</p>
+              <div className="post-modal-reactions">
+                {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
+                  const count = selectedPost.reactionCounts?.[type] || 0;
+                  return count > 0 ? (
+                    <span key={type} className="post-modal-reaction">{emoji} {count}</span>
+                  ) : null;
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

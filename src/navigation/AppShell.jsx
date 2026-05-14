@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useOutletContext } from 'react-router-dom';
 import BottomNav from './BottomNav';
 import SideDrawer from '../components/common/SideDrawer';
 import './AppShell.css';
@@ -10,7 +10,7 @@ export default function AppShell() {
   return (
     <div className="app-shell">
       <div className="app-content">
-        <Outlet />
+        <Outlet context={{ onMenuOpen: () => setDrawerOpen(true) }} />
       </div>
       <BottomNav onMenuOpen={() => setDrawerOpen(true)} />
       <SideDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />

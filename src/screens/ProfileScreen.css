@@ -239,3 +239,70 @@
   margin: 0.25rem 0 0.75rem;
   max-width: 280px;
 }
+
+/* Edit Profile button */
+.edit-profile-btn {
+  margin-top: 12px;
+  padding: 7px 24px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.edit-profile-btn:hover { background: var(--bg-tertiary); }
+
+/* Edit Profile modal */
+.edit-profile-modal {
+  padding: 24px 20px;
+}
+.edit-profile-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+.edit-profile-msg {
+  font-size: 13px;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.edit-profile-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 14px 0 6px;
+}
+.edit-profile-pic-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+.edit-profile-pic-preview {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.edit-profile-pic-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+}
+.edit-profile-pic-btn {
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}

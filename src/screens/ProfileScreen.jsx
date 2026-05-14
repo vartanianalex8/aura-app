@@ -1,22 +1,34 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, Flame, Award, X, Grid3x3 } from 'lucide-react';
+import { Settings, Flame, Award, X, Grid3x3, Users } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { postService } from '../services/posts';
+import { socialService } from '../services/social';
+import { authService } from '../services/auth';
 import { ROUTES } from '../constants/routes';
 import { REACTION_EMOJIS } from '../constants/config';
-import { timeAgo, getTotalReactions, getDominantReaction } from '../utils/helpers';
+import { timeAgo, getTotalReactions } from '../utils/helpers';
 import './ProfileScreen.css';
 
 export default function ProfileScreen() {
-  const { user, logOut } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editBio, setEditBio] = useState(user?.bio || '');
+  const [editUsername, setEditUsername] = useState('');
+  const [editMsg, setEditMsg] = useState('');
+  const [editingCaption, setEditingCaption] = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [profilePicFile, setProfilePicFile] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     loadPosts();
+    loadSocialCounts();
   }, [user]);
 
   const loadPosts = async () => {
@@ -31,8 +43,19 @@ export default function ProfileScreen() {
     }
   };
 
-  const [editingCaption, setEditingCaption] = useState('');
-  const [editMode, setEditMode] = useState(false);
+  const loadSocialCounts = async () => {
+    if (!user?.objectId) return;
+    try {
+      const [fc, fwc] = await Promise.all([
+        socialService.getFollowerCount(user.objectId).catch(() => 0),
+        socialService.getFollowingCount(user.objectId).catch(() => 0),
+      ]);
+      setFollowerCount(fc);
+      setFollowingCount(fwc);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleEdit = async (postId) => {
     try {
@@ -45,12 +68,6 @@ export default function ProfileScreen() {
     }
   };
 
-  const openPost = (p) => {
-    setSelectedPost(p);
-    setEditingCaption(p.caption || '');
-    setEditMode(false);
-  };
-
   const handleDelete = async (postId) => {
     if (!window.confirm('Delete this post?')) return;
     try {
@@ -59,6 +76,37 @@ export default function ProfileScreen() {
       loadPosts();
     } catch (err) {
       alert(err.message);
+    }
+  };
+
+  const openPost = (p) => {
+    setSelectedPost(p);
+    setEditingCaption(p.caption || '');
+    setEditMode(false);
+  };
+
+  const handleSaveProfile = async () => {
+    setEditMsg('');
+    try {
+      const updates = {};
+      if (editUsername.trim()) {
+        if (editUsername.length > 15) { setEditMsg('Username must be 15 chars or fewer'); return; }
+        updates.username = editUsername.trim();
+      }
+      if (editBio !== (user?.bio || '')) updates.bio = editBio.trim();
+      if (Object.keys(updates).length > 0) {
+        await authService.updateProfile(updates);
+      }
+      if (profilePicFile) {
+        await authService.uploadProfilePicture(profilePicFile);
+        setProfilePicFile(null);
+      }
+      await refreshUser();
+      setEditMsg('Profile updated!');
+      setEditUsername('');
+      setTimeout(() => { setEditMsg(''); setShowEditProfile(false); }, 1500);
+    } catch (err) {
+      setEditMsg(err.message || 'Failed to update profile');
     }
   };
 
@@ -75,11 +123,9 @@ export default function ProfileScreen() {
 
       <div className="profile-card">
         <div className="profile-pic-wrap">
-          {profilePic ? (
-            <img src={profilePic} alt="" className="profile-pic" />
-          ) : (
-            <div className="profile-pic-placeholder" />
-          )}
+          {profilePic
+            ? <img src={profilePic} alt="" className="profile-pic" />
+            : <div className="profile-pic-placeholder" />}
         </div>
         <h3 className="profile-name">@{user?.username}</h3>
         {user?.bio && <p className="profile-bio">{user.bio}</p>}
@@ -100,7 +146,20 @@ export default function ProfileScreen() {
             <span className="stat-num">{posts.length}</span>
             <span className="stat-label">Posts</span>
           </div>
+          <div className="stat">
+            <Users size={16} />
+            <span className="stat-num">{followerCount}</span>
+            <span className="stat-label">Followers</span>
+          </div>
+          <div className="stat">
+            <span className="stat-num">{followingCount}</span>
+            <span className="stat-label">Following</span>
+          </div>
         </div>
+
+        <button className="edit-profile-btn" onClick={() => { setEditBio(user?.bio || ''); setShowEditProfile(true); }}>
+          Edit Profile
+        </button>
       </div>
 
       {/* Posts grid */}
@@ -112,11 +171,9 @@ export default function ProfileScreen() {
         ) : (
           posts.map((p) => (
             <div key={p.objectId} className="profile-grid-item" onClick={() => openPost(p)}>
-              {p.image ? (
-                <img src={p.image.url} alt="" />
-              ) : (
-                <div className="profile-text-post">{p.caption?.slice(0, 50)}</div>
-              )}
+              {p.image
+                ? <img src={p.image.url} alt="" />
+                : <div className="profile-text-post">{p.caption?.slice(0, 50)}</div>}
             </div>
           ))
         )}
@@ -166,9 +223,7 @@ export default function ProfileScreen() {
                 {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
                   const count = selectedPost.reactionCounts?.[type] || 0;
                   return count > 0 ? (
-                    <span key={type} className="post-modal-reaction">
-                      {emoji} {count}
-                    </span>
+                    <span key={type} className="post-modal-reaction">{emoji} {count}</span>
                   ) : null;
                 })}
               </div>
@@ -180,7 +235,56 @@ export default function ProfileScreen() {
         </div>
       )}
 
-      <button className="logout-btn" onClick={logOut}>Log Out</button>
+      {/* Edit Profile modal */}
+      {showEditProfile && (
+        <div className="post-modal-overlay" onClick={() => setShowEditProfile(false)}>
+          <div className="post-modal edit-profile-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="post-modal-close" onClick={() => setShowEditProfile(false)}>
+              <X size={20} />
+            </button>
+            <h3 className="edit-profile-title">Edit Profile</h3>
+            {editMsg && <p className="edit-profile-msg">{editMsg}</p>}
+
+            <label className="edit-profile-label">Profile Picture</label>
+            <div className="edit-profile-pic-row">
+              {(profilePicFile ? URL.createObjectURL(profilePicFile) : profilePic) ? (
+                <img src={profilePicFile ? URL.createObjectURL(profilePicFile) : profilePic} alt="" className="edit-profile-pic-preview" />
+              ) : (
+                <div className="edit-profile-pic-placeholder" />
+              )}
+              <label className="edit-profile-pic-btn">
+                Change photo
+                <input type="file" accept="image/*" hidden onChange={(e) => setProfilePicFile(e.target.files[0])} />
+              </label>
+            </div>
+
+            <label className="edit-profile-label">Username</label>
+            <input
+              className="settings-input"
+              placeholder={`@${user?.username}`}
+              value={editUsername}
+              onChange={(e) => setEditUsername(e.target.value)}
+              maxLength={15}
+            />
+
+            <label className="edit-profile-label">Bio</label>
+            <textarea
+              className="settings-input"
+              placeholder="Write something about yourself..."
+              value={editBio}
+              onChange={(e) => setEditBio(e.target.value)}
+              maxLength={150}
+              rows={3}
+              style={{ resize: 'none' }}
+            />
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'right', display: 'block' }}>{editBio.length}/150</span>
+
+            <button className="auth-btn" style={{ marginTop: '1rem' }} onClick={handleSaveProfile}>
+              Save Changes
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

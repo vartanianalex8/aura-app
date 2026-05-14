@@ -135,31 +135,40 @@ export const postService = {
     }
   },
 
-  async getFeed({ sort = 'recent', skip = 0, limit = 20 } = {}) {
+  async getFollowingFeed({ skip = 0, limit = 20 } = {}) {
+    const Follow = Parse.Object.extend('Follow');
+    const currentUser = Parse.User.current();
+    if (!currentUser) return [];
+
+    // Get list of followed user IDs
+    const followQuery = new Parse.Query(Follow);
+    followQuery.equalTo('follower', currentUser);
+    followQuery.limit(500);
+    const follows = await followQuery.find();
+    const followedIds = follows.map((f) => f.get('following')?.id).filter(Boolean);
+
+    if (followedIds.length === 0) return [];
+
+    const followedPointers = followedIds.map((id) => Parse.User.createWithoutData(id));
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
     const query = new Parse.Query(Post);
+    query.containedIn('author', followedPointers);
+    query.greaterThan('createdAt', cutoff);
+    query.descending('createdAt');
     query.include('author');
     query.skip(skip);
     query.limit(limit);
 
-    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    query.greaterThan('createdAt', cutoff);
-
-    switch (sort) {
-      case 'recent': query.descending('createdAt'); break;
-      case 'oldest': query.ascending('createdAt'); break;
-      case 'popular': query.descending('createdAt'); break;
-      default: query.descending('createdAt');
-    }
-
     const results = await query.find();
     if (results.length === 0) return [];
 
-    // Batch-fetch reactions and comments for all posts at once.
-    // Wrapped in try/catch so a CLP/permission error degrades gracefully
-    // instead of crashing the whole feed.
+    return this._enrichPosts(results, currentUser);
+  },
+
+  async _enrichPosts(results, currentUser) {
     const Reaction = Parse.Object.extend('Reaction');
     const Comment = Parse.Object.extend('Comment');
-    const currentUser = Parse.User.current();
     const postPointers = results.map((p) => Post.createWithoutData(p.id));
 
     let allReactions = [];
@@ -183,7 +192,6 @@ export const postService = {
       console.warn('[Aura] Could not fetch comments batch:', e.message);
     }
 
-    // Build lookup maps keyed by post ID
     const reactionMap = {};
     const userReactionMap = {};
     const commentCountMap = {};
@@ -218,6 +226,29 @@ export const postService = {
         },
       };
     });
+  },
+
+  async getFeed({ sort = 'recent', skip = 0, limit = 20 } = {}) {
+    const query = new Parse.Query(Post);
+    query.include('author');
+    query.skip(skip);
+    query.limit(limit);
+
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    query.greaterThan('createdAt', cutoff);
+
+    switch (sort) {
+      case 'recent': query.descending('createdAt'); break;
+      case 'oldest': query.ascending('createdAt'); break;
+      case 'popular': query.descending('createdAt'); break;
+      default: query.descending('createdAt');
+    }
+
+    const results = await query.find();
+    if (results.length === 0) return [];
+
+    const currentUser = Parse.User.current();
+    return this._enrichPosts(results, currentUser);
   },
 
   async getUserPosts(userId) {

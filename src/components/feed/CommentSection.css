@@ -125,3 +125,26 @@
   color: var(--accent);
   font-weight: 600;
 }
+
+/* Updated gate styling */
+.comment-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  gap: 6px;
+}
+.comment-gate-icon {
+  font-size: 22px;
+}
+.comment-gate-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+.comment-empty {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 12px 0;
+}

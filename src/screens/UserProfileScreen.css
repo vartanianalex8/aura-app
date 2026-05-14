@@ -110,3 +110,38 @@
   font-size: 0.9rem;
   padding: 2rem 0;
 }
+
+.user-posted-today-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 12px;
+  color: var(--accent);
+  background: var(--bg-primary);
+  border-radius: 50%;
+  line-height: 1;
+}
+
+.profile-follow-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 24px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+
+.profile-follow-btn.following {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.profile-follow-btn:disabled { opacity: 0.6; }

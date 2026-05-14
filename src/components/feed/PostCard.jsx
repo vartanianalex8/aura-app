@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Trash2, MoreHorizontal, Bookmark, BookmarkCheck, Pencil } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Trash2, MoreHorizontal, Bookmark, BookmarkCheck, Pencil, SmilePlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { REACTION_EMOJIS, POST_CATEGORIES } from '../../constants/config';
 import { timeAgo, getTotalReactions, getDominantReaction } from '../../utils/helpers';
 import { postService } from '../../services/posts';
 import { socialService } from '../../services/social';
+import { notificationService } from '../../services/notifications';
 import { useAuth } from '../../hooks/useAuth';
 import CommentSection from './CommentSection';
 import './PostCard.css';
@@ -14,6 +15,7 @@ export default function PostCard({ post, onDelete }) {
   const [userReaction, setUserReaction] = useState(post.userReaction || null);
   const [showComments, setShowComments] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showReactions, setShowReactions] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saved, setSaved] = useState(socialService.isPostSaved(post.objectId));
   const [commentCount, setCommentCount] = useState(post.commentCount || 0);
@@ -21,11 +23,10 @@ export default function PostCard({ post, onDelete }) {
   const [editCaption, setEditCaption] = useState(post.caption || '');
   const { user } = useAuth();
   const navigate = useNavigate();
+  const reactionPanelRef = useRef(null);
 
   const author = post.authorData || {};
 
-  // For posts loaded outside the feed (profile, saved), userReaction isn't pre-populated.
-  // Fetch it once on mount in that case.
   useEffect(() => {
     if (post.userReaction === undefined) {
       postService.getUserReaction(post.objectId)
@@ -33,6 +34,19 @@ export default function PostCard({ post, onDelete }) {
         .catch(() => {});
     }
   }, [post.objectId]);
+
+  // Close reaction panel on outside click
+  useEffect(() => {
+    if (!showReactions) return;
+    const handler = (e) => {
+      if (reactionPanelRef.current && !reactionPanelRef.current.contains(e.target)) {
+        setShowReactions(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showReactions]);
+
   const profilePic = author.profilePicture?.url || author.profilePicture;
   const total = getTotalReactions(counts);
   const dominant = getDominantReaction(counts);
@@ -40,22 +54,34 @@ export default function PostCard({ post, onDelete }) {
   const category = POST_CATEGORIES.find((c) => c.value === post.category);
   const statusEmoji = author.status ? { online: '🟢', away: '🟡', dnd: '🔴', offline: '⚫' }[author.status] : null;
 
+  // Only show expiry when < 6 hours remain
   const getTimeRemaining = () => {
     const created = new Date(post.createdAt).getTime();
     const expiresAt = created + 24 * 60 * 60 * 1000;
     const remaining = expiresAt - Date.now();
-    if (remaining <= 0) return 'Expired';
+    if (remaining <= 0) return null;
     const hours = Math.floor(remaining / (1000 * 60 * 60));
+    if (hours >= 6) return null; // don't show if plenty of time left
     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
     if (hours > 0) return `${hours}h ${minutes}m left`;
     return `${minutes}m left`;
   };
+  const timeRemaining = getTimeRemaining();
 
   const handleReact = async (type) => {
+    setShowReactions(false);
     try {
       const result = await postService.react(post.objectId, type);
       setCounts(result.counts);
       setUserReaction(result.userReaction);
+      // Notify post author if we added a reaction (not removed)
+      if (result.userReaction && author.objectId) {
+        notificationService.create({
+          toUserId: author.objectId,
+          type: 'reaction',
+          postId: post.objectId,
+        }).catch(() => {});
+      }
     } catch (err) {
       console.error(err);
     }
@@ -75,16 +101,9 @@ export default function PostCard({ post, onDelete }) {
 
   const handleSave = async () => {
     try {
-      if (saved) {
-        await socialService.unsavePost(post.objectId);
-        setSaved(false);
-      } else {
-        await socialService.savePost(post.objectId);
-        setSaved(true);
-      }
-    } catch (err) {
-      console.error(err);
-    }
+      if (saved) { await socialService.unsavePost(post.objectId); setSaved(false); }
+      else { await socialService.savePost(post.objectId); setSaved(true); }
+    } catch (err) { console.error(err); }
   };
 
   const handleEdit = async () => {
@@ -93,14 +112,10 @@ export default function PostCard({ post, onDelete }) {
       post.caption = editCaption;
       setEditing(false);
       setShowMenu(false);
-    } catch (err) {
-      alert(err.message);
-    }
+    } catch (err) { alert(err.message); }
   };
 
-  const handleTagClick = (tag) => {
-    navigate(`/hashtag/${tag}`);
-  };
+  const handleTagClick = (tag) => navigate(`/hashtag/${tag}`);
 
   return (
     <article className={`post-card ${deleting ? 'post-card--deleting' : ''}`}>
@@ -117,7 +132,10 @@ export default function PostCard({ post, onDelete }) {
           >
             @{author.username || 'unknown'}
           </span>
-          <span className="post-time">{timeAgo(post.createdAt)} · <span className="post-expiry">⏳ {getTimeRemaining()}</span></span>
+          <span className="post-time">
+            {timeAgo(post.createdAt)}
+            {timeRemaining && <span className="post-expiry"> · ⏳ {timeRemaining}</span>}
+          </span>
         </div>
         <div className="post-actions-right">
           {category && <span className="post-category-badge" title={category.label}>{category.emoji}</span>}
@@ -164,9 +182,7 @@ export default function PostCard({ post, onDelete }) {
           </div>
         </div>
       ) : (
-        <>
-          {post.caption && <p className="post-caption">{post.caption}</p>}
-        </>
+        post.caption && <p className="post-caption">{post.caption}</p>
       )}
 
       {post.hashtags?.length > 0 && (
@@ -179,29 +195,53 @@ export default function PostCard({ post, onDelete }) {
 
       {post.location && <p className="post-location">📍 {post.location}</p>}
 
+      {/* Reaction bar — compact with expand panel */}
       <div className="post-reactions">
-        <div className="reaction-btns">
-          {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
-            const count = counts[type] || 0;
-            return (
+        <div className="reaction-summary-row">
+          {/* Current reaction or dominant */}
+          <div className="reaction-left">
+            {total > 0 && (
+              <span className="reaction-summary-pill">
+                {userReaction ? REACTION_EMOJIS[userReaction] : dominant ? REACTION_EMOJIS[dominant] : ''}
+                {' '}{total}
+              </span>
+            )}
+          </div>
+          <div className="reaction-actions">
+            <div className="reaction-trigger-wrap" ref={reactionPanelRef}>
               <button
-                key={type}
-                className={`reaction-btn ${userReaction === type ? 'active' : ''}`}
-                onClick={() => handleReact(type)}
+                className={`reaction-trigger-btn ${userReaction ? 'reacted' : ''}`}
+                onClick={() => setShowReactions((v) => !v)}
               >
-                {emoji}
-                {count > 0 && <span className="reaction-btn-count">{count}</span>}
+                {userReaction ? (
+                  <span>{REACTION_EMOJIS[userReaction]}</span>
+                ) : (
+                  <SmilePlus size={18} />
+                )}
+                <span className="reaction-trigger-label">{userReaction ? 'Reacted' : 'React'}</span>
               </button>
-            );
-          })}
+              {showReactions && (
+                <div className="reaction-panel">
+                  {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => (
+                    <button
+                      key={type}
+                      className={`reaction-panel-btn ${userReaction === type ? 'active' : ''}`}
+                      onClick={() => handleReact(type)}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <button className="comment-action-btn" onClick={() => setShowComments(!showComments)}>
+              💬 <span>{commentCount}</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <button className="comment-toggle" onClick={() => setShowComments(!showComments)}>
-        💬 {commentCount} comments
-      </button>
-
-      {showComments && <CommentSection postId={post.objectId} onCommentAdded={() => setCommentCount(c => c + 1)} />}
+      {showComments && <CommentSection postId={post.objectId} authorId={author.objectId} onCommentAdded={() => setCommentCount(c => c + 1)} />}
     </article>
   );
 }

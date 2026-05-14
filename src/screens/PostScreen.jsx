@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, X, MapPin } from 'lucide-react';
+import { Camera, X, MapPin, ImagePlus } from 'lucide-react';
 import { postService } from '../services/posts';
 import { POST_RULES, POST_CATEGORIES } from '../constants/config';
 import { ROUTES } from '../constants/routes';
@@ -17,7 +17,6 @@ export default function PostScreen() {
   const [canPost, setCanPost] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [step, setStep] = useState(1);
   const fileRef = useRef();
   const navigate = useNavigate();
 
@@ -48,7 +47,6 @@ export default function PostScreen() {
           const country = addr.country_code?.toUpperCase() || '';
           setLocation([city, state, country].filter(Boolean).join(', '));
         } catch {
-          // Fallback: leave blank so user can type manually
           setLocation('');
         }
       },
@@ -61,23 +59,19 @@ export default function PostScreen() {
     if (!file) return;
     setImage(file);
     setPreview(URL.createObjectURL(file));
-    setStep(2);
   };
+
+  const removeImage = () => { setImage(null); setPreview(null); };
 
   const addHashtag = () => {
     const tag = hashtagInput.trim().replace(/^#/, '').toLowerCase();
-    if (tag && !hashtags.includes(tag)) {
-      setHashtags([...hashtags, tag]);
-    }
+    if (tag && !hashtags.includes(tag) && hashtags.length < 10) setHashtags([...hashtags, tag]);
     setHashtagInput('');
-  };
-
-  const removeHashtag = (tag) => {
-    setHashtags(hashtags.filter((t) => t !== tag));
   };
 
   const handleSubmit = async () => {
     if (!canPost) return setError('You already posted today!');
+    if (!caption.trim() && !image) return setError('Add a photo or write something first');
     setLoading(true);
     setError('');
     try {
@@ -103,104 +97,101 @@ export default function PostScreen() {
   return (
     <div className="post-screen">
       <header className="post-screen-header">
-        <h2>Share your moment</h2>
-        <span className="post-step-label">Step {step} of 3</span>
+        <h2>New Moment</h2>
+        <button
+          className="post-submit-btn"
+          onClick={handleSubmit}
+          disabled={loading || (!caption.trim() && !image)}
+        >
+          {loading ? 'Sharing...' : 'Share'}
+        </button>
       </header>
 
       {error && <div className="post-error">{error}</div>}
 
-      {step === 1 && (
-        <div className="post-capture">
-          <div className="capture-area" onClick={() => fileRef.current?.click()}>
-            <Camera size={40} />
-            <p>Tap to add a photo</p>
-            <span>or skip for a text-only post</span>
+      {/* Image area */}
+      <div className="post-image-area">
+        {preview ? (
+          <div className="post-preview-wrap">
+            <img src={preview} alt="Preview" className="post-preview-img" />
+            <button className="post-preview-remove" onClick={removeImage}><X size={18} /></button>
           </div>
-          <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
-          <button className="skip-btn" onClick={() => setStep(3)}>
-            Text only post →
+        ) : (
+          <button className="post-image-placeholder" onClick={() => fileRef.current?.click()}>
+            <ImagePlus size={32} />
+            <span>Add a photo</span>
+            <span className="post-image-optional">optional</span>
           </button>
-        </div>
-      )}
+        )}
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleFileChange} />
+      </div>
 
-      {step === 2 && preview && (
-        <div className="post-preview">
-          <div className="preview-img-wrap">
-            <img src={preview} alt="Preview" />
-            <button className="preview-remove" onClick={() => { setImage(null); setPreview(null); setStep(1); }}>
-              <X size={18} />
+      {/* Caption */}
+      <div className="post-caption-area">
+        <textarea
+          className="post-caption-input"
+          placeholder="What's your moment today?"
+          value={caption}
+          onChange={(e) => setCaption(e.target.value)}
+          maxLength={POST_RULES.MAX_CAPTION_LENGTH}
+          rows={3}
+        />
+        <span className="char-count">{caption.length}/{POST_RULES.MAX_CAPTION_LENGTH}</span>
+      </div>
+
+      {/* Category */}
+      <div className="post-section">
+        <span className="post-section-label">Category</span>
+        <div className="category-options">
+          {POST_CATEGORIES.map((cat) => (
+            <button
+              key={cat.value}
+              className={`category-chip ${category === cat.value ? 'active' : ''}`}
+              onClick={() => setCategory(cat.value)}
+            >
+              {cat.emoji} {cat.label}
             </button>
-          </div>
-          <button className="auth-btn" onClick={() => setStep(3)}>Looks good →</button>
+          ))}
         </div>
-      )}
+      </div>
 
-      {step === 3 && (
-        <div className="post-config">
-          {preview && (
-            <div className="config-thumb">
-              <img src={preview} alt="" />
-            </div>
-          )}
-
-          {/* Category picker */}
-          <div className="category-picker">
-            <span className="category-label">Category</span>
-            <div className="category-options">
-              {POST_CATEGORIES.map((cat) => (
-                <button
-                  key={cat.value}
-                  className={`category-chip ${category === cat.value ? 'active' : ''}`}
-                  onClick={() => setCategory(cat.value)}
-                >
-                  {cat.emoji} {cat.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <textarea
-            className="post-caption-input"
-            placeholder="Write a caption..."
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            maxLength={POST_RULES.MAX_CAPTION_LENGTH}
+      {/* Hashtags */}
+      <div className="post-section">
+        <span className="post-section-label">Hashtags</span>
+        <div className="hashtag-row">
+          <input
+            className="auth-input"
+            placeholder="Add a hashtag"
+            value={hashtagInput}
+            onChange={(e) => setHashtagInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addHashtag())}
           />
-          <span className="char-count">{caption.length}/{POST_RULES.MAX_CAPTION_LENGTH}</span>
-
-          <div className="hashtag-row">
-            <input
-              className="auth-input"
-              placeholder="Add hashtag"
-              value={hashtagInput}
-              onChange={(e) => setHashtagInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addHashtag())}
-            />
-            <button className="tag-add-btn" onClick={addHashtag}>+</button>
-          </div>
-          {hashtags.length > 0 && (
-            <div className="hashtag-chips">
-              {hashtags.map((t) => (
-                <span key={t} className="hashtag-chip" onClick={() => removeHashtag(t)}>#{t} ×</span>
-              ))}
-            </div>
-          )}
-
-          <div className="location-row">
-            <MapPin size={16} />
-            <input
-              className="auth-input"
-              placeholder="Add location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </div>
-
-          <button className="auth-btn" onClick={handleSubmit} disabled={loading}>
-            {loading ? 'Posting...' : 'Share your moment'}
-          </button>
+          <button className="tag-add-btn" onClick={addHashtag}>+</button>
         </div>
-      )}
+        {hashtags.length > 0 && (
+          <div className="hashtag-chips">
+            {hashtags.map((t) => (
+              <span key={t} className="hashtag-chip" onClick={() => setHashtags(hashtags.filter((h) => h !== t))}>
+                #{t} ×
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Location */}
+      <div className="post-section">
+        <span className="post-section-label">Location</span>
+        <div className="location-row">
+          <MapPin size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+          <input
+            className="auth-input"
+            placeholder="Add location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
+        </div>
+      </div>
     </div>
   );
 }
