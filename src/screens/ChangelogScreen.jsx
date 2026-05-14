@@ -13,9 +13,9 @@ const VERSIONS = [
       { type: 'improved', text: 'Recent searches now save the actual person\'s profile with their photo and name — tapping goes straight to their profile, no re-searching' },
       { type: 'improved', text: 'Trending hashtags and recent searches now appear immediately when you open the Search tab' },
       { type: 'improved', text: 'Text-only posts in the profile grid now scale font size based on content — short posts are big and bold, longer ones shrink to fit cleanly' },
-      { type: 'fix', text: 'Profile picture now reliably shows on your own profile — root cause was Parse.File URLs not being populated on session restore; fixed by storing the URL as a plain string field' },
+      { type: 'fix', text: 'Profile picture now reliably shows on your own profile — now fetched from UserIndex (the same trusted source used for all other profiles), with multiple fallbacks' },
       { type: 'fix', text: 'Removed the category emoji badge from post cards (📸 was showing on every post)' },
-      { type: 'fix', text: 'Profile picture changes now persist correctly across sessions and app restarts' },
+      { type: 'fix', text: 'Profile picture persists correctly across Vercel deployments and full page reloads' },
     ],
   },
   {

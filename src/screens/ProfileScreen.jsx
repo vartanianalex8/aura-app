@@ -5,10 +5,13 @@ import { useAuth } from '../hooks/useAuth';
 import { postService } from '../services/posts';
 import { socialService } from '../services/social';
 import { authService } from '../services/auth';
+import Parse from '../services/parse';
 import { ROUTES } from '../constants/routes';
 import { REACTION_EMOJIS } from '../constants/config';
 import { timeAgo, getTextPostFontSize } from '../utils/helpers';
 import './ProfileScreen.css';
+
+const UserIndex = Parse.Object.extend('UserIndex');
 
 export default function ProfileScreen() {
   const { user, refreshUser } = useAuth();
@@ -26,7 +29,30 @@ export default function ProfileScreen() {
   const [profilePicFile, setProfilePicFile] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => { loadPosts(); loadSocialCounts(); }, [user]);
+  const [profilePicUrl, setProfilePicUrl] = useState(null);
+
+  useEffect(() => { loadPosts(); loadSocialCounts(); loadProfilePic(); }, [user]);
+
+  // Fetch profile pic from UserIndex — same reliable path used for all other profiles
+  const loadProfilePic = async () => {
+    if (!user?.objectId) return;
+    // Prefer plain string field set on upload
+    if (user?.profilePictureUrl) { setProfilePicUrl(user.profilePictureUrl); return; }
+    // Fallback: query UserIndex (publicly readable, always has string URL)
+    try {
+      const q = new Parse.Query(UserIndex);
+      q.equalTo('userId', user.objectId);
+      const idx = await q.first();
+      if (idx?.get('profilePictureUrl')) {
+        setProfilePicUrl(idx.get('profilePictureUrl'));
+      } else {
+        // Last resort: whatever the auth object has
+        setProfilePicUrl(user?.profilePicture?.url || null);
+      }
+    } catch {
+      setProfilePicUrl(user?.profilePicture?.url || null);
+    }
+  };
 
   const loadPosts = async () => {
     if (!user?.objectId) return;
@@ -84,13 +110,14 @@ export default function ProfileScreen() {
         setProfilePicFile(null);
       }
       await refreshUser();
+      await loadProfilePic();
       setEditMsg('Profile updated!');
       setEditUsername('');
       setTimeout(() => { setEditMsg(''); setShowEditProfile(false); }, 1500);
     } catch (err) { setEditMsg(err.message || 'Failed to update profile'); }
   };
 
-  const profilePic = user?.profilePicture?.url;
+  
 
   return (
     <div className="profile-screen">
@@ -106,8 +133,8 @@ export default function ProfileScreen() {
         {/* Top row: avatar + stats */}
         <div className="profile-top-row">
           <div className="profile-pic-wrap">
-            {profilePic
-              ? <img src={profilePic} alt="" className="profile-pic" />
+            {profilePicUrl
+              ? <img src={profilePicUrl} alt="" className="profile-pic" />
               : <div className="profile-pic-placeholder" />}
           </div>
           <div className="profile-stats-col">
@@ -201,8 +228,8 @@ export default function ProfileScreen() {
 
             <label className="edit-profile-label">Profile Picture</label>
             <div className="edit-profile-pic-row">
-              {(profilePicFile ? URL.createObjectURL(profilePicFile) : profilePic) ? (
-                <img src={profilePicFile ? URL.createObjectURL(profilePicFile) : profilePic} alt="" className="edit-profile-pic-preview" />
+              {(profilePicFile ? URL.createObjectURL(profilePicFile) : profilePicUrl) ? (
+                <img src={profilePicUrlFile ? URL.createObjectURL(profilePicFile) : profilePic} alt="" className="edit-profile-pic-preview" />
               ) : <div className="edit-profile-pic-placeholder" />}
               <label className="edit-profile-pic-btn">
                 Change photo

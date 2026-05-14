@@ -19,11 +19,14 @@ async function syncUserIndex(user) {
       idx.setACL(acl);
     }
     const pic = user.get('profilePicture');
+    const picUrlStr = user.get('profilePictureUrl') // plain string — most reliable
+      || (pic ? (typeof pic.url === 'function' ? pic.url() : pic?.url) : null)
+      || null;
     idx.set('username', user.get('username') || '');
     idx.set('streakCount', user.get('streakCount') || 0);
     idx.set('longestStreak', user.get('longestStreak') || 0);
     idx.set('bio', user.get('bio') || '');
-    idx.set('profilePictureUrl', pic ? (typeof pic.url === 'function' ? pic.url() : pic) : null);
+    idx.set('profilePictureUrl', picUrlStr);
     await idx.save();
   } catch (e) {
     console.warn('[Aura] UserIndex sync failed:', e.message);
