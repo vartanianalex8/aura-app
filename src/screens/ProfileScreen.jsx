@@ -59,7 +59,7 @@ export default function ProfileScreen() {
   };
 
   const handleDelete = async (postId) => {
-    if (!window.confirm('Delete this post?')) return;
+    if (!window.confirm('Delete this post? You can only delete once per day.')) return;
     try {
       await postService.deletePost(postId);
       setSelectedPost(null);

@@ -87,7 +87,7 @@ export default function PostCard({ post, onDelete }) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Delete this post?')) return;
+    if (!window.confirm('Delete this post? You can only delete once per day.')) return;
     setDeleting(true);
     try {
       await postService.deletePost(post.objectId);

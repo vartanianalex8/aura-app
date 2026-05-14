@@ -55,13 +55,28 @@ export const postService = {
   async deletePost(postId) {
     const user = Parse.User.current();
     if (!user) throw new Error('Not logged in');
+
+    // Enforce one deletion per day
+    const lastDelete = user.get('lastDeleteDate');
+    if (lastDelete) {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const lastDay = new Date(lastDelete); lastDay.setHours(0, 0, 0, 0);
+      if (lastDay.getTime() === today.getTime()) {
+        throw new Error('You can only delete one post per day. Come back tomorrow.');
+      }
+    }
+
     const post = await new Parse.Query(Post).get(postId);
     if (post.get('author').id !== user.id) throw new Error('Not your post');
-    // Best-effort cleanup — don't let it block the actual delete
+
     try { await this._cleanupPostDeps(postId); } catch (e) {
       console.warn('[Aura] Cleanup skipped:', e.message);
     }
     await post.destroy();
+
+    // Record deletion date on the user
+    user.set('lastDeleteDate', new Date());
+    await user.save();
   },
 
   async editPost(postId, { caption, hashtags, location, category }) {
