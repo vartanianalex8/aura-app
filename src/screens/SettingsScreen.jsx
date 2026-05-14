@@ -5,16 +5,15 @@ import { useTheme } from '../hooks/useTheme';
 import { authService } from '../services/auth';
 import { useAuth } from '../hooks/useAuth';
 import { ROUTES } from '../constants/routes';
-import { STATUS_OPTIONS, LOGO_OPTIONS, BG_OPTIONS } from '../constants/config';
+import { STATUS_OPTIONS } from '../constants/config';
 import './SettingsScreen.css';
 
 export default function SettingsScreen() {
-  const { mode, setMode, logoStyle, setLogoStyle, bgStyle, setBgStyle } = useTheme();
-  const { user, refreshUser } = useAuth();
+  const { mode, setMode } = useTheme();
+  const { user, refreshUser, logOut } = useAuth();
   const [status, setStatus] = useState(user?.status || 'online');
   const [newUsername, setNewUsername] = useState('');
   const [newEmail, setNewEmail] = useState('');
-  const [newBio, setNewBio] = useState(user?.bio || '');
   const [accountMsg, setAccountMsg] = useState('');
   const fileRef = useRef();
   const navigate = useNavigate();
@@ -22,13 +21,12 @@ export default function SettingsScreen() {
   const handlePicUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      alert('Image must be under 10MB');
-      return;
-    }
+    if (file.size > 10 * 1024 * 1024) { alert('Image must be under 10MB'); return; }
     try {
       await authService.uploadProfilePicture(file);
       refreshUser();
+      setAccountMsg('Profile picture updated!');
+      setTimeout(() => setAccountMsg(''), 3000);
     } catch (err) {
       alert(err.message);
     }
@@ -71,17 +69,6 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleBioChange = async () => {
-    try {
-      await authService.updateProfile({ bio: newBio.trim() });
-      refreshUser();
-      setAccountMsg('Bio updated!');
-      setTimeout(() => setAccountMsg(''), 3000);
-    } catch (err) {
-      setAccountMsg(err.message || 'Failed to update bio');
-    }
-  };
-
   const handleResetPassword = async () => {
     const email = user?.email;
     if (!email) { alert('No email on file'); return; }
@@ -102,7 +89,7 @@ export default function SettingsScreen() {
         <h2>Settings</h2>
       </header>
 
-      {/* Theme */}
+      {/* Appearance */}
       <section className="settings-section">
         <h3>Appearance</h3>
         <div className="theme-options">
@@ -118,46 +105,6 @@ export default function SettingsScreen() {
             >
               {opt.icon}
               {opt.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Logo Style */}
-      <section className="settings-section">
-        <h3>Logo Style</h3>
-        <div className="logo-options">
-          {LOGO_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              className={`logo-opt ${logoStyle === opt.value ? 'active' : ''}`}
-              onClick={() => setLogoStyle(opt.value)}
-            >
-              <span
-                className="logo-preview"
-                style={{ background: `linear-gradient(135deg, ${opt.colors[0]}, ${opt.colors[1]})` }}
-              />
-              <span>{opt.label}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Background */}
-      <section className="settings-section">
-        <h3>Background</h3>
-        <div className="bg-options">
-          {BG_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              className={`bg-opt ${bgStyle === opt.value ? 'active' : ''}`}
-              onClick={() => setBgStyle(opt.value)}
-            >
-              <div
-                className="bg-preview"
-                style={{ background: opt.bg || 'var(--bg-primary)' }}
-              />
-              <span>{opt.label}</span>
             </button>
           ))}
         </div>
@@ -179,52 +126,42 @@ export default function SettingsScreen() {
         </div>
       </section>
 
-      {/* Profile Picture */}
-      <section className="settings-section">
-        <h3>Profile Picture</h3>
-        <button className="settings-row" onClick={() => fileRef.current?.click()}>
-          Upload new photo (max 10MB)
-        </button>
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={handlePicUpload} />
-      </section>
-
       {/* Account */}
       <section className="settings-section">
         <h3>Account</h3>
         {accountMsg && <p className="settings-msg">{accountMsg}</p>}
+
+        <p className="settings-field-label">Profile Picture</p>
+        <button className="settings-row" onClick={() => fileRef.current?.click()}>
+          Upload new photo <span className="settings-row-hint">max 10MB</span>
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={handlePicUpload} />
+
+        <p className="settings-field-label">Username</p>
         <div className="settings-input-row">
           <input
             className="settings-input"
             type="text"
-            placeholder={`Current: @${user?.username || ''}`}
+            placeholder={`@${user?.username || ''}`}
             value={newUsername}
             onChange={(e) => setNewUsername(e.target.value)}
             maxLength={15}
           />
           <button className="settings-save-btn" onClick={handleUsernameChange}>Update</button>
         </div>
+
+        <p className="settings-field-label">Email</p>
         <div className="settings-input-row">
           <input
             className="settings-input"
             type="email"
-            placeholder={`Current: ${user?.email || ''}`}
+            placeholder={user?.email || ''}
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
           />
           <button className="settings-save-btn" onClick={handleEmailChange}>Update</button>
         </div>
-        <div className="settings-input-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.5rem' }}>
-          <textarea
-            className="settings-input"
-            placeholder="Bio (optional, shown on your profile)"
-            value={newBio}
-            onChange={(e) => setNewBio(e.target.value)}
-            maxLength={150}
-            rows={3}
-            style={{ resize: 'vertical' }}
-          />
-          <button className="settings-save-btn" onClick={handleBioChange}>Update bio</button>
-        </div>
+
         <button className="settings-row" onClick={handleResetPassword}>
           Reset password
         </button>
@@ -236,7 +173,12 @@ export default function SettingsScreen() {
         <button className="settings-row" onClick={() => navigate(ROUTES.CHANGELOG)}>
           📋 Patch Notes
         </button>
-        <div className="settings-version">Aura v1.5.0</div>
+        <div className="settings-version">Aura v1.6.0</div>
+      </section>
+
+      {/* Logout */}
+      <section className="settings-section">
+        <button className="settings-logout-btn" onClick={logOut}>Log Out</button>
       </section>
     </div>
   );
