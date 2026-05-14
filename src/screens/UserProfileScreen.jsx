@@ -6,7 +6,7 @@ import { socialService } from '../services/social';
 import { notificationService } from '../services/notifications';
 import Parse from '../services/parse';
 import { useAuth } from '../hooks/useAuth';
-import { timeAgo } from '../utils/helpers';
+import { timeAgo, getTextPostFontSize } from '../utils/helpers';
 import { REACTION_EMOJIS } from '../constants/config';
 import './ProfileScreen.css';
 import './UserProfileScreen.css';
@@ -176,7 +176,7 @@ export default function UserProfileScreen() {
             <div key={p.objectId} className="profile-grid-item" onClick={() => setSelectedPost(p)}>
               {p.image
                 ? <img src={p.image.url} alt="" />
-                : <div className="profile-text-post"><span className="profile-text-post-inner">{p.caption?.slice(0, 120)}</span></div>}
+                : <div className="profile-text-post"><span className="profile-text-post-inner" style={{ fontSize: getTextPostFontSize(p.caption) }}>{p.caption?.slice(0, 120)}</span></div>}
             </div>
           ))
         )}

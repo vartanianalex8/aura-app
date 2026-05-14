@@ -41,3 +41,12 @@ export function getTotalReactions(counts) {
   if (!counts) return 0;
   return Object.values(counts).reduce((a, b) => a + b, 0);
 }
+
+export function getTextPostFontSize(text) {
+  const len = text?.length || 0;
+  if (len <= 12)  return '30px';
+  if (len <= 25)  return '22px';
+  if (len <= 50)  return '16px';
+  if (len <= 100) return '13px';
+  return '11px';
+}
