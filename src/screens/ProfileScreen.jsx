@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, Flame, Award, X, Grid3x3, Users } from 'lucide-react';
+import { Settings, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { postService } from '../services/posts';
 import { socialService } from '../services/social';
 import { authService } from '../services/auth';
 import { ROUTES } from '../constants/routes';
 import { REACTION_EMOJIS } from '../constants/config';
-import { timeAgo, getTotalReactions } from '../utils/helpers';
+import { timeAgo } from '../utils/helpers';
 import './ProfileScreen.css';
 
 export default function ProfileScreen() {
@@ -26,21 +26,15 @@ export default function ProfileScreen() {
   const [profilePicFile, setProfilePicFile] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadPosts();
-    loadSocialCounts();
-  }, [user]);
+  useEffect(() => { loadPosts(); loadSocialCounts(); }, [user]);
 
   const loadPosts = async () => {
     if (!user?.objectId) return;
     try {
       const data = await postService.getUserPosts(user.objectId);
       setPosts(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   };
 
   const loadSocialCounts = async () => {
@@ -52,9 +46,7 @@ export default function ProfileScreen() {
       ]);
       setFollowerCount(fc);
       setFollowingCount(fwc);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   const handleEdit = async (postId) => {
@@ -63,9 +55,7 @@ export default function ProfileScreen() {
       setSelectedPost((p) => ({ ...p, caption: editingCaption }));
       setPosts((prev) => prev.map((p) => p.objectId === postId ? { ...p, caption: editingCaption } : p));
       setEditMode(false);
-    } catch (err) {
-      alert(err.message);
-    }
+    } catch (err) { alert(err.message); }
   };
 
   const handleDelete = async (postId) => {
@@ -74,16 +64,10 @@ export default function ProfileScreen() {
       await postService.deletePost(postId);
       setSelectedPost(null);
       loadPosts();
-    } catch (err) {
-      alert(err.message);
-    }
+    } catch (err) { alert(err.message); }
   };
 
-  const openPost = (p) => {
-    setSelectedPost(p);
-    setEditingCaption(p.caption || '');
-    setEditMode(false);
-  };
+  const openPost = (p) => { setSelectedPost(p); setEditingCaption(p.caption || ''); setEditMode(false); };
 
   const handleSaveProfile = async () => {
     setEditMsg('');
@@ -94,9 +78,7 @@ export default function ProfileScreen() {
         updates.username = editUsername.trim();
       }
       if (editBio !== (user?.bio || '')) updates.bio = editBio.trim();
-      if (Object.keys(updates).length > 0) {
-        await authService.updateProfile(updates);
-      }
+      if (Object.keys(updates).length > 0) await authService.updateProfile(updates);
       if (profilePicFile) {
         await authService.uploadProfilePicture(profilePicFile);
         setProfilePicFile(null);
@@ -105,9 +87,7 @@ export default function ProfileScreen() {
       setEditMsg('Profile updated!');
       setEditUsername('');
       setTimeout(() => { setEditMsg(''); setShowEditProfile(false); }, 1500);
-    } catch (err) {
-      setEditMsg(err.message || 'Failed to update profile');
-    }
+    } catch (err) { setEditMsg(err.message || 'Failed to update profile'); }
   };
 
   const profilePic = user?.profilePicture?.url;
@@ -121,45 +101,42 @@ export default function ProfileScreen() {
         </button>
       </header>
 
+      {/* Profile card — Instagram layout */}
       <div className="profile-card">
-        <div className="profile-pic-wrap">
-          {profilePic
-            ? <img src={profilePic} alt="" className="profile-pic" />
-            : <div className="profile-pic-placeholder" />}
-        </div>
-        <h3 className="profile-name">@{user?.username}</h3>
-        {user?.bio && <p className="profile-bio">{user.bio}</p>}
-
-        <div className="profile-stats">
-          <div className="stat">
-            <Flame size={16} />
-            <span className="stat-num">{user?.streakCount || 0}</span>
-            <span className="stat-label">Streak</span>
+        {/* Top row: avatar + stats */}
+        <div className="profile-top-row">
+          <div className="profile-pic-wrap">
+            {profilePic
+              ? <img src={profilePic} alt="" className="profile-pic" />
+              : <div className="profile-pic-placeholder" />}
           </div>
-          <div className="stat">
-            <Award size={16} />
-            <span className="stat-num">{user?.longestStreak || 0}</span>
-            <span className="stat-label">Best</span>
-          </div>
-          <div className="stat">
-            <Grid3x3 size={16} />
-            <span className="stat-num">{posts.length}</span>
-            <span className="stat-label">Posts</span>
-          </div>
-          <div className="stat">
-            <Users size={16} />
-            <span className="stat-num">{followerCount}</span>
-            <span className="stat-label">Followers</span>
-          </div>
-          <div className="stat">
-            <span className="stat-num">{followingCount}</span>
-            <span className="stat-label">Following</span>
+          <div className="profile-stats-col">
+            <div className="profile-stats">
+              <div className="stat">
+                <span className="stat-num">{posts.length}</span>
+                <span className="stat-label">Posts</span>
+              </div>
+              <div className="stat">
+                <span className="stat-num">{followerCount}</span>
+                <span className="stat-label">Followers</span>
+              </div>
+              <div className="stat">
+                <span className="stat-num">{followingCount}</span>
+                <span className="stat-label">Following</span>
+              </div>
+            </div>
+            <button className="edit-profile-btn" onClick={() => { setEditBio(user?.bio || ''); setShowEditProfile(true); }}>
+              Edit Profile
+            </button>
           </div>
         </div>
 
-        <button className="edit-profile-btn" onClick={() => { setEditBio(user?.bio || ''); setShowEditProfile(true); }}>
-          Edit Profile
-        </button>
+        {/* Username, streak, bio */}
+        <div className="profile-info-block">
+          <p className="profile-name">@{user?.username}</p>
+          <p className="profile-streak-badge">🔥 {user?.streakCount || 0} day streak · best {user?.longestStreak || 0}</p>
+          {user?.bio && <p className="profile-bio">{user.bio}</p>}
+        </div>
       </div>
 
       {/* Posts grid */}
@@ -183,25 +160,12 @@ export default function ProfileScreen() {
       {selectedPost && (
         <div className="post-modal-overlay" onClick={() => setSelectedPost(null)}>
           <div className="post-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="post-modal-close" onClick={() => setSelectedPost(null)}>
-              <X size={20} />
-            </button>
-            {selectedPost.image && (
-              <div className="post-modal-img">
-                <img src={selectedPost.image.url} alt="" />
-              </div>
-            )}
+            <button className="post-modal-close" onClick={() => setSelectedPost(null)}><X size={20} /></button>
+            {selectedPost.image && <div className="post-modal-img"><img src={selectedPost.image.url} alt="" /></div>}
             <div className="post-modal-body">
               {editMode ? (
                 <>
-                  <textarea
-                    className="post-edit-input"
-                    value={editingCaption}
-                    onChange={(e) => setEditingCaption(e.target.value)}
-                    maxLength={1000}
-                    rows={4}
-                    style={{ width: '100%', marginBottom: '0.5rem' }}
-                  />
+                  <textarea className="post-edit-input" value={editingCaption} onChange={(e) => setEditingCaption(e.target.value)} maxLength={1000} rows={4} style={{ width: '100%', marginBottom: '0.5rem' }} />
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button className="post-edit-cancel" onClick={() => setEditMode(false)}>Cancel</button>
                     <button className="post-edit-save" onClick={() => handleEdit(selectedPost.objectId)}>Save</button>
@@ -213,23 +177,15 @@ export default function ProfileScreen() {
                   <button className="post-modal-edit" onClick={() => setEditMode(true)}>✏️ Edit caption</button>
                 </>
               )}
-              {selectedPost.hashtags?.length > 0 && (
-                <p className="post-modal-tags">
-                  {selectedPost.hashtags.map((t) => <span key={t} className="post-tag">#{t} </span>)}
-                </p>
-              )}
+              {selectedPost.hashtags?.length > 0 && <p className="post-modal-tags">{selectedPost.hashtags.map((t) => <span key={t} className="post-tag">#{t} </span>)}</p>}
               <p className="post-modal-time">{timeAgo(selectedPost.createdAt)}</p>
               <div className="post-modal-reactions">
                 {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
                   const count = selectedPost.reactionCounts?.[type] || 0;
-                  return count > 0 ? (
-                    <span key={type} className="post-modal-reaction">{emoji} {count}</span>
-                  ) : null;
+                  return count > 0 ? <span key={type} className="post-modal-reaction">{emoji} {count}</span> : null;
                 })}
               </div>
-              <button className="post-modal-delete" onClick={() => handleDelete(selectedPost.objectId)}>
-                Delete Post
-              </button>
+              <button className="post-modal-delete" onClick={() => handleDelete(selectedPost.objectId)}>Delete Post</button>
             </div>
           </div>
         </div>
@@ -239,9 +195,7 @@ export default function ProfileScreen() {
       {showEditProfile && (
         <div className="post-modal-overlay" onClick={() => setShowEditProfile(false)}>
           <div className="post-modal edit-profile-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="post-modal-close" onClick={() => setShowEditProfile(false)}>
-              <X size={20} />
-            </button>
+            <button className="post-modal-close" onClick={() => setShowEditProfile(false)}><X size={20} /></button>
             <h3 className="edit-profile-title">Edit Profile</h3>
             {editMsg && <p className="edit-profile-msg">{editMsg}</p>}
 
@@ -249,9 +203,7 @@ export default function ProfileScreen() {
             <div className="edit-profile-pic-row">
               {(profilePicFile ? URL.createObjectURL(profilePicFile) : profilePic) ? (
                 <img src={profilePicFile ? URL.createObjectURL(profilePicFile) : profilePic} alt="" className="edit-profile-pic-preview" />
-              ) : (
-                <div className="edit-profile-pic-placeholder" />
-              )}
+              ) : <div className="edit-profile-pic-placeholder" />}
               <label className="edit-profile-pic-btn">
                 Change photo
                 <input type="file" accept="image/*" hidden onChange={(e) => setProfilePicFile(e.target.files[0])} />
@@ -259,29 +211,13 @@ export default function ProfileScreen() {
             </div>
 
             <label className="edit-profile-label">Username</label>
-            <input
-              className="settings-input"
-              placeholder={`@${user?.username}`}
-              value={editUsername}
-              onChange={(e) => setEditUsername(e.target.value)}
-              maxLength={15}
-            />
+            <input className="settings-input" placeholder={`@${user?.username}`} value={editUsername} onChange={(e) => setEditUsername(e.target.value)} maxLength={15} />
 
             <label className="edit-profile-label">Bio</label>
-            <textarea
-              className="settings-input"
-              placeholder="Write something about yourself..."
-              value={editBio}
-              onChange={(e) => setEditBio(e.target.value)}
-              maxLength={150}
-              rows={3}
-              style={{ resize: 'none' }}
-            />
+            <textarea className="settings-input" placeholder="Write something about yourself..." value={editBio} onChange={(e) => setEditBio(e.target.value)} maxLength={150} rows={3} style={{ resize: 'none' }} />
             <span style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'right', display: 'block' }}>{editBio.length}/150</span>
 
-            <button className="auth-btn" style={{ marginTop: '1rem' }} onClick={handleSaveProfile}>
-              Save Changes
-            </button>
+            <button className="auth-btn" style={{ marginTop: '1rem' }} onClick={handleSaveProfile}>Save Changes</button>
           </div>
         </div>
       )}

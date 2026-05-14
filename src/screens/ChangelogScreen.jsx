@@ -4,6 +4,32 @@ import './ChangelogScreen.css';
 
 const VERSIONS = [
   {
+    version: '1.6.0',
+    date: 'May 14, 2026',
+    title: 'The Social Overhaul',
+    changes: [
+      { type: 'new', text: 'Following feed — new tab on the home screen showing only posts from people you follow' },
+      { type: 'new', text: 'Notifications — get alerted when someone reacts to your post, comments, or follows you' },
+      { type: 'new', text: 'Notification bell in the bottom nav with live unread badge' },
+      { type: 'new', text: 'Edit Profile — change your photo, username, and bio directly from the profile page' },
+      { type: 'new', text: 'Post search — search for posts by keyword or hashtag, not just usernames' },
+      { type: 'new', text: 'Recent searches — search history saved locally, just like Instagram' },
+      { type: 'improved', text: 'Profile layout redesigned — cleaner Instagram-style with pic + stats side by side' },
+      { type: 'improved', text: 'Other user profiles now show a full post grid (not just today\'s moment)' },
+      { type: 'improved', text: 'Followers and following counts now shown on both your profile and others\'' },
+      { type: 'improved', text: 'Reaction UI redesigned — collapsed to a single button that expands into an emoji picker' },
+      { type: 'improved', text: 'Post expiry timer now only shows when under 6 hours remain' },
+      { type: 'improved', text: 'Comment word limit raised from 10 to 50 words' },
+      { type: 'improved', text: 'Post creation simplified to a single screen — no more multi-step wizard' },
+      { type: 'improved', text: 'Feed now paginates — loads 15 posts at a time with infinite scroll' },
+      { type: 'improved', text: 'Refresh button added to the home feed header' },
+      { type: 'improved', text: 'Settings simplified — removed Logo Style and Background clutter' },
+      { type: 'fix', text: 'Logout moved to Settings only — removed from profile page' },
+      { type: 'fix', text: 'GIF picker removed — was limited to 6 hardcoded GIFs' },
+      { type: 'fix', text: 'Leaderboard removed temporarily for a full redesign' },
+    ],
+  },
+  {
     version: '1.5.0',
     date: 'April 15, 2026',
     title: 'Profiles & Polish',
