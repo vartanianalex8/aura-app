@@ -176,7 +176,7 @@ export default function UserProfileScreen() {
             <div key={p.objectId} className="profile-grid-item" onClick={() => setSelectedPost(p)}>
               {p.image
                 ? <img src={p.image.url} alt="" />
-                : <div className="profile-text-post">{p.caption?.slice(0, 50)}</div>}
+                : <div className="profile-text-post"><span className="profile-text-post-inner">{p.caption?.slice(0, 120)}</span></div>}
             </div>
           ))
         )}
