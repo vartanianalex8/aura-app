@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Trash2, MoreHorizontal, Bookmark, BookmarkCheck, Pencil, SmilePlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { REACTION_EMOJIS, POST_CATEGORIES } from '../../constants/config';
+import { REACTION_EMOJIS } from '../../constants/config';
 import { timeAgo, getTotalReactions, getDominantReaction } from '../../utils/helpers';
 import { postService } from '../../services/posts';
 import { socialService } from '../../services/social';
@@ -51,7 +51,6 @@ export default function PostCard({ post, onDelete }) {
   const total = getTotalReactions(counts);
   const dominant = getDominantReaction(counts);
   const isOwner = user?.objectId === author.objectId;
-  const category = POST_CATEGORIES.find((c) => c.value === post.category);
   const statusEmoji = author.status ? { online: '🟢', away: '🟡', dnd: '🔴', offline: '⚫' }[author.status] : null;
 
   // Only show expiry when < 6 hours remain
@@ -138,7 +137,6 @@ export default function PostCard({ post, onDelete }) {
           </span>
         </div>
         <div className="post-actions-right">
-          {category && <span className="post-category-badge" title={category.label}>{category.emoji}</span>}
           <button className={`save-btn ${saved ? 'saved' : ''}`} onClick={handleSave}>
             {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
           </button>

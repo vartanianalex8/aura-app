@@ -87,7 +87,15 @@ export const authService = {
 
   getCurrentUser() {
     const user = Parse.User.current();
-    return user ? user.toJSON() : null;
+    if (!user) return null;
+    const json = user.toJSON();
+    // Normalize profilePicture to always be { url: string } or null
+    const pic = user.get('profilePicture');
+    const picUrl = pic
+      ? (typeof pic.url === 'function' ? pic.url() : pic?.url || null)
+      : (json.profilePicture?.url || null);
+    json.profilePicture = picUrl ? { url: picUrl } : null;
+    return json;
   },
 
   async resetPassword(email) {
