@@ -91,10 +91,13 @@ export default function HomeScreen() {
   }, [feedTab, sort]);
 
   const handleRefresh = async () => {
+    if (refreshing) return; // prevent double-tap
     setRefreshing(true);
+    setFeedError('');
     skipRef.current = 0;
     setHasMore(true);
     setFollowingEmpty(false);
+    setPosts([]); // clear immediately so old posts don't linger
     try {
       let data;
       if (feedTab === 'following') {
@@ -117,7 +120,7 @@ export default function HomeScreen() {
     if (!loaderRef.current) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading && !refreshing) {
           loadPosts(false);
         }
       },

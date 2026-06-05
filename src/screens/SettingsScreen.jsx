@@ -14,6 +14,7 @@ export default function SettingsScreen() {
   const [status, setStatus] = useState(user?.status || 'online');
   const [newUsername, setNewUsername] = useState('');
   const [newEmail, setNewEmail] = useState('');
+  const [newBio, setNewBio] = useState(user?.bio || '');
   const [accountMsg, setAccountMsg] = useState('');
   const fileRef = useRef();
   const navigate = useNavigate();
@@ -59,6 +60,15 @@ export default function SettingsScreen() {
       setAccountMsg('Email updated!');
       setTimeout(() => setAccountMsg(''), 3000);
     } catch (err) { setAccountMsg(err.message || 'Failed to update email'); }
+  };
+
+  const handleBioChange = async () => {
+    try {
+      await authService.updateProfile({ bio: newBio.trim() });
+      refreshUser();
+      setAccountMsg('Bio updated!');
+      setTimeout(() => setAccountMsg(''), 3000);
+    } catch (err) { setAccountMsg(err.message || 'Failed to update bio'); }
   };
 
   const handleResetPassword = async () => {
@@ -127,6 +137,21 @@ export default function SettingsScreen() {
           <input className="settings-input" type="email" placeholder={user?.email || ''} value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
           <button className="settings-save-btn" onClick={handleEmailChange}>Update</button>
         </div>
+
+        <p className="settings-field-label">Bio</p>
+        <div style={{ position: 'relative' }}>
+          <textarea
+            className="settings-input"
+            placeholder="Write something about yourself..."
+            value={newBio}
+            onChange={(e) => setNewBio(e.target.value)}
+            maxLength={150}
+            rows={3}
+            style={{ resize: 'none', width: '100%', paddingBottom: '1.4rem', boxSizing: 'border-box' }}
+          />
+          <span style={{ position: 'absolute', bottom: '0.5rem', right: '0.75rem', fontSize: '11px', color: 'var(--text-muted)' }}>{newBio.length}/150</span>
+        </div>
+        <button className="settings-save-btn" style={{ marginBottom: '0.75rem' }} onClick={handleBioChange}>Update Bio</button>
 
         <button className="settings-row" onClick={handleResetPassword}>Reset password</button>
       </section>
