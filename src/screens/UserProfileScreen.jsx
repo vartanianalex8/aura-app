@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, UserPlus, UserCheck, X } from 'lucide-react';
+import { ChevronLeft, UserPlus, UserCheck, X, ShieldOff, ShieldCheck, Flag } from 'lucide-react';
 import { postService } from '../services/posts';
 import { socialService } from '../services/social';
 import { notificationService } from '../services/notifications';
+import { moderationService } from '../services/moderation';
+import ReportModal from './ReportModal';
 import Parse from '../services/parse';
 import { useAuth } from '../hooks/useAuth';
 import { timeAgo, getTextPostFontSize } from '../utils/helpers';
@@ -26,6 +28,9 @@ export default function UserProfileScreen() {
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [blocked, setBlocked] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [blockLoading, setBlockLoading] = useState(false);
 
   const isOwnProfile = currentUser?.objectId === userId;
 
@@ -60,6 +65,7 @@ export default function UserProfileScreen() {
         socialService.getFollowingCount(userId).catch(() => 0),
       ]);
       setFollowing(isFollowing);
+      setBlocked(moderationService.isBlocked(userId));
       setFollowerCount(fc);
       setFollowingCount(fwc);
     } catch (err) {
@@ -84,6 +90,17 @@ export default function UserProfileScreen() {
       }
     } catch (err) { console.error(err); }
     finally { setFollowLoading(false); }
+  };
+
+  const handleBlock = async () => {
+    if (blocked) {
+      setBlockLoading(true);
+      try { await moderationService.unblockUser(userId); setBlocked(false); } catch (err) { console.error(err); } finally { setBlockLoading(false); }
+    } else {
+      if (!window.confirm('Block @' + (profileUser?.username || '') + '? They will not be able to see your posts and you will not see theirs.')) return;
+      setBlockLoading(true);
+      try { await moderationService.blockUser(userId); setBlocked(true); setFollowing(false); } catch (err) { alert(err.message); } finally { setBlockLoading(false); }
+    }
   };
 
   if (loading) {
@@ -149,12 +166,27 @@ export default function UserProfileScreen() {
             <button
               className={`user-follow-btn ${following ? 'following' : ''}`}
               onClick={handleFollow}
-              disabled={followLoading}
+              disabled={followLoading || blocked}
             >
               {following
                 ? <><UserCheck size={14} /> Following</>
                 : <><UserPlus size={14} /> Follow</>}
             </button>
+            <div style={{ display: 'flex', gap: '0.4rem' }}>
+              <button
+                onClick={handleBlock}
+                disabled={blockLoading}
+                style={{ flex: 1, padding: '0.4rem 0.6rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}
+              >
+                {blocked ? <><ShieldCheck size={13} /> Unblock</> : <><ShieldOff size={13} /> Block</>}
+              </button>
+              <button
+                onClick={() => setShowReport(true)}
+                style={{ flex: 1, padding: '0.4rem 0.6rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}
+              >
+                <Flag size={13} /> Report
+              </button>
+            </div>
           </div>
         </div>
 
@@ -207,6 +239,14 @@ export default function UserProfileScreen() {
             </div>
           </div>
         </div>
+      )}
+      {showReport && (
+        <ReportModal
+          targetId={userId}
+          targetType="user"
+          targetName={profileUser?.username}
+          onClose={() => setShowReport(false)}
+        />
       )}
     </div>
   );

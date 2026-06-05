@@ -4,6 +4,23 @@ import './ChangelogScreen.css';
 
 const VERSIONS = [
   {
+    version: '1.7.0',
+    date: 'June 2026',
+    title: 'The Safety & Insight Update',
+    changes: [
+      { type: 'new', text: 'Blocking system — block/unblock users from their profile; manage blocked list in Settings → Privacy' },
+      { type: 'new', text: 'Report posts and users — choose category, add details, submit directly from post or profile' },
+      { type: 'new', text: 'Monthly & Yearly Recap — see post count, top reactions, top hashtags, activity chart, and most loved post' },
+      { type: 'new', text: 'Full Help Center — Login/Recovery, Suspended Accounts, Terms & Guidelines, Contact Support with real FAQ content' },
+      { type: 'new', text: 'Recap accessible from side drawer (My Recap)' },
+      { type: 'improved', text: 'Side drawer now includes Notifications, Leaderboard, Recap, and Help Center links' },
+      { type: 'improved', text: 'Leaderboard rows now tap through to user profiles' },
+      { type: 'improved', text: 'Settings now has Privacy & Safety section with blocked users management' },
+      { type: 'fix', text: 'Fixed profile picture preview crash in Edit Profile modal' },
+      { type: 'fix', text: 'Fixed duplicate variable reference bug in ProfileScreen image upload' },
+    ],
+  },
+  {
     version: '1.6.2',
     date: 'May 14, 2026',
     title: 'Bug Fix Sweep',

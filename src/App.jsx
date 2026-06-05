@@ -17,28 +17,23 @@ import SavedScreen from './screens/SavedScreen';
 import NotificationsScreen from './screens/NotificationsScreen';
 import HashtagScreen from './screens/HashtagScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
+import LeaderboardScreen from './screens/LeaderboardScreen';
+import RecapScreen from './screens/RecapScreen';
+import HelpScreen from './screens/HelpScreen';
+import BlockedUsersScreen from './screens/BlockedUsersScreen';
 import './styles/global.css';
 
 class ErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { error: null };
-  }
-  static getDerivedStateFromError(error) {
-    return { error };
-  }
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error }; }
   render() {
     if (this.state.error) {
       return (
         <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-primary)' }}>
           <h2 style={{ marginBottom: '0.5rem' }}>Something went wrong</h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-            {this.state.error.message}
-          </p>
-          <button
-            onClick={() => { this.setState({ error: null }); window.location.href = '/'; }}
-            style={{ padding: '0.6rem 1.5rem', borderRadius: '999px', border: '1px solid var(--accent)', background: 'transparent', color: 'var(--accent)', cursor: 'pointer' }}
-          >
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{this.state.error.message}</p>
+          <button onClick={() => { this.setState({ error: null }); window.location.href = '/'; }}
+            style={{ padding: '0.6rem 1.5rem', borderRadius: '999px', border: '1px solid var(--accent)', background: 'transparent', color: 'var(--accent)', cursor: 'pointer' }}>
             Reload app
           </button>
         </div>
@@ -78,6 +73,10 @@ function AppRoutes() {
         <Route path="/notifications" element={<NotificationsScreen />} />
         <Route path="/hashtag/:tag" element={<HashtagScreen />} />
         <Route path="/user/:userId" element={<UserProfileScreen />} />
+        <Route path="/leaderboard" element={<LeaderboardScreen />} />
+        <Route path="/recap" element={<RecapScreen />} />
+        <Route path="/help" element={<HelpScreen />} />
+        <Route path="/blocked" element={<BlockedUsersScreen />} />
       </Route>
     </Routes>
   );

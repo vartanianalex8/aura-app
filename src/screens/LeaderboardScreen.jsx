@@ -41,7 +41,7 @@ export default function LeaderboardScreen() {
           {/* Top 3 podium */}
           <div className="lb-podium">
             {users.slice(0, 3).map((u, i) => (
-              <div key={u.objectId} className={`podium-item podium-${i + 1}`}>
+              <div key={u.objectId} className={`podium-item podium-${i + 1}`} onClick={() => navigate(`/user/${u.objectId}`)} style={{ cursor: "pointer" }}>
                 <div className="podium-avatar">
                   {u.profilePicture ? (
                     <img src={u.profilePicture} alt="" />
@@ -64,6 +64,8 @@ export default function LeaderboardScreen() {
               <div
                 key={u.objectId}
                 className={`lb-row ${u.objectId === currentUser?.objectId ? 'lb-row--me' : ''}`}
+                onClick={() => navigate(`/user/${u.objectId}`)}
+                style={{ cursor: 'pointer' }}
               >
                 <span className="lb-rank">#{u.rank}</span>
                 <div className="lb-avatar">

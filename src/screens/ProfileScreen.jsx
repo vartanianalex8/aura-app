@@ -229,7 +229,7 @@ export default function ProfileScreen() {
             <label className="edit-profile-label">Profile Picture</label>
             <div className="edit-profile-pic-row">
               {(profilePicFile ? URL.createObjectURL(profilePicFile) : profilePicUrl) ? (
-                <img src={profilePicUrlFile ? URL.createObjectURL(profilePicFile) : profilePic} alt="" className="edit-profile-pic-preview" />
+                <img src={profilePicFile ? URL.createObjectURL(profilePicFile) : profilePicUrl} alt="" className="edit-profile-pic-preview" />
               ) : <div className="edit-profile-pic-placeholder" />}
               <label className="edit-profile-pic-btn">
                 Change photo

@@ -8,6 +8,7 @@ import { socialService } from '../../services/social';
 import { notificationService } from '../../services/notifications';
 import { useAuth } from '../../hooks/useAuth';
 import CommentSection from './CommentSection';
+import ReportModal from '../../screens/ReportModal';
 import './PostCard.css';
 
 export default function PostCard({ post, onDelete }) {
@@ -20,6 +21,7 @@ export default function PostCard({ post, onDelete }) {
   const [saved, setSaved] = useState(socialService.isPostSaved(post.objectId));
   const [commentCount, setCommentCount] = useState(post.commentCount || 0);
   const [editing, setEditing] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const [editCaption, setEditCaption] = useState(post.caption || '');
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -140,6 +142,11 @@ export default function PostCard({ post, onDelete }) {
           <button className={`save-btn ${saved ? 'saved' : ''}`} onClick={handleSave}>
             {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
           </button>
+          {!isOwner && (
+            <button className="post-menu-btn" title="Report" onClick={() => setShowReport(true)} style={{ color: "var(--text-muted)" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            </button>
+          )}
           {isOwner && (
             <div className="post-menu-wrap">
               <button className="post-menu-btn" onClick={() => setShowMenu(!showMenu)}>
@@ -240,6 +247,14 @@ export default function PostCard({ post, onDelete }) {
       </div>
 
       {showComments && <CommentSection postId={post.objectId} authorId={author.objectId} onCommentAdded={() => setCommentCount(c => c + 1)} />}
+
+      {showReport && (
+        <ReportModal
+          targetId={post.objectId}
+          targetType="post"
+          onClose={() => setShowReport(false)}
+        />
+      )}
     </article>
   );
 }

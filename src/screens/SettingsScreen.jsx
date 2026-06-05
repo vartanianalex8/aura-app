@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Sun, Moon, Monitor } from 'lucide-react';
+import { ChevronLeft, Sun, Moon, Monitor, ShieldOff } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { authService } from '../services/auth';
 import { useAuth } from '../hooks/useAuth';
@@ -27,9 +27,7 @@ export default function SettingsScreen() {
       refreshUser();
       setAccountMsg('Profile picture updated!');
       setTimeout(() => setAccountMsg(''), 3000);
-    } catch (err) {
-      alert(err.message);
-    }
+    } catch (err) { alert(err.message); }
   };
 
   const handleStatusChange = async (val) => {
@@ -37,9 +35,7 @@ export default function SettingsScreen() {
     try {
       await authService.updateProfile({ status: val });
       refreshUser();
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   const handleUsernameChange = async () => {
@@ -51,9 +47,7 @@ export default function SettingsScreen() {
       setNewUsername('');
       setAccountMsg('Username updated!');
       setTimeout(() => setAccountMsg(''), 3000);
-    } catch (err) {
-      setAccountMsg(err.message || 'Failed to update username');
-    }
+    } catch (err) { setAccountMsg(err.message || 'Failed to update username'); }
   };
 
   const handleEmailChange = async () => {
@@ -64,9 +58,7 @@ export default function SettingsScreen() {
       setNewEmail('');
       setAccountMsg('Email updated!');
       setTimeout(() => setAccountMsg(''), 3000);
-    } catch (err) {
-      setAccountMsg(err.message || 'Failed to update email');
-    }
+    } catch (err) { setAccountMsg(err.message || 'Failed to update email'); }
   };
 
   const handleResetPassword = async () => {
@@ -74,18 +66,14 @@ export default function SettingsScreen() {
     if (!email) { alert('No email on file'); return; }
     try {
       await authService.resetPassword(email);
-      alert(`Password reset email sent to ${email}`);
-    } catch (err) {
-      alert(err.message);
-    }
+      alert('Password reset email sent to ' + email);
+    } catch (err) { alert(err.message); }
   };
 
   return (
     <div className="settings-screen">
       <header className="settings-header">
-        <button className="back-btn" onClick={() => navigate(-1)}>
-          <ChevronLeft size={20} />
-        </button>
+        <button className="back-btn" onClick={() => navigate(-1)}><ChevronLeft size={20} /></button>
         <h2>Settings</h2>
       </header>
 
@@ -98,13 +86,8 @@ export default function SettingsScreen() {
             { val: 'dark', icon: <Moon size={16} />, label: 'Dark' },
             { val: 'system', icon: <Monitor size={16} />, label: 'System' },
           ].map((opt) => (
-            <button
-              key={opt.val}
-              className={`theme-btn ${mode === opt.val ? 'active' : ''}`}
-              onClick={() => setMode(opt.val)}
-            >
-              {opt.icon}
-              {opt.label}
+            <button key={opt.val} className={'theme-btn' + (mode === opt.val ? ' active' : '')} onClick={() => setMode(opt.val)}>
+              {opt.icon}{opt.label}
             </button>
           ))}
         </div>
@@ -115,11 +98,7 @@ export default function SettingsScreen() {
         <h3>Status</h3>
         <div className="status-options">
           {STATUS_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              className={`status-btn ${status === opt.value ? 'active' : ''}`}
-              onClick={() => handleStatusChange(opt.value)}
-            >
+            <button key={opt.value} className={'status-btn' + (status === opt.value ? ' active' : '')} onClick={() => handleStatusChange(opt.value)}>
               {opt.emoji} {opt.label}
             </button>
           ))}
@@ -139,41 +118,35 @@ export default function SettingsScreen() {
 
         <p className="settings-field-label">Username</p>
         <div className="settings-input-row">
-          <input
-            className="settings-input"
-            type="text"
-            placeholder={`@${user?.username || ''}`}
-            value={newUsername}
-            onChange={(e) => setNewUsername(e.target.value)}
-            maxLength={15}
-          />
+          <input className="settings-input" type="text" placeholder={'@' + (user?.username || '')} value={newUsername} onChange={(e) => setNewUsername(e.target.value)} maxLength={15} />
           <button className="settings-save-btn" onClick={handleUsernameChange}>Update</button>
         </div>
 
         <p className="settings-field-label">Email</p>
         <div className="settings-input-row">
-          <input
-            className="settings-input"
-            type="email"
-            placeholder={user?.email || ''}
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-          />
+          <input className="settings-input" type="email" placeholder={user?.email || ''} value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
           <button className="settings-save-btn" onClick={handleEmailChange}>Update</button>
         </div>
 
-        <button className="settings-row" onClick={handleResetPassword}>
-          Reset password
+        <button className="settings-row" onClick={handleResetPassword}>Reset password</button>
+      </section>
+
+      {/* Privacy & Safety */}
+      <section className="settings-section">
+        <h3>Privacy & Safety</h3>
+        <button className="settings-row" onClick={() => navigate('/blocked')}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <ShieldOff size={16} /> Blocked Users
+          </span>
         </button>
       </section>
 
       {/* About */}
       <section className="settings-section">
         <h3>About</h3>
-        <button className="settings-row" onClick={() => navigate(ROUTES.CHANGELOG)}>
-          📋 Patch Notes
-        </button>
-        <div className="settings-version">Aura v1.6.0</div>
+        <button className="settings-row" onClick={() => navigate(ROUTES.CHANGELOG)}>📋 Patch Notes</button>
+        <button className="settings-row" onClick={() => navigate('/help')}>❓ Help Center</button>
+        <div className="settings-version">Aura v1.7.0</div>
       </section>
 
       {/* Logout */}

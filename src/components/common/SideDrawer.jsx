@@ -1,13 +1,17 @@
 import { useNavigate } from 'react-router-dom';
-import { X, BookmarkIcon, FileText, Settings } from 'lucide-react';
+import { X, BookmarkIcon, FileText, Settings, Trophy, BarChart2, HelpCircle, Bell } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { ROUTES } from '../../constants/routes';
 import './SideDrawer.css';
 
 const MENU_ITEMS = [
+  { icon: Bell, label: 'Notifications', route: '/notifications' },
   { icon: BookmarkIcon, label: 'Saved Posts', route: '/saved' },
+  { icon: Trophy, label: 'Leaderboard', route: '/leaderboard' },
+  { icon: BarChart2, label: 'My Recap', route: '/recap' },
   { icon: Settings, label: 'Settings', route: ROUTES.SETTINGS },
   { icon: FileText, label: 'Patch Notes', route: ROUTES.CHANGELOG },
+  { icon: HelpCircle, label: 'Help Center', route: '/help' },
 ];
 
 export default function SideDrawer({ open, onClose }) {
@@ -17,28 +21,23 @@ export default function SideDrawer({ open, onClose }) {
   const handleNav = (route) => { navigate(route); onClose(); };
   const handleLogout = async () => { await logOut(); onClose(); };
 
-  // Reliable profile pic: prefer profilePictureUrl string, then profilePicture.url
   const picUrl = user?.profilePictureUrl || user?.profilePicture?.url || null;
 
   return (
     <>
-      <div className={`drawer-overlay ${open ? 'open' : ''}`} onClick={onClose} />
-      <aside className={`side-drawer ${open ? 'open' : ''}`}>
+      <div className={'drawer-overlay' + (open ? ' open' : '')} onClick={onClose} />
+      <aside className={'side-drawer' + (open ? ' open' : '')}>
         <div className="drawer-header">
           <div className="drawer-user">
             <div className="drawer-avatar">
-              {picUrl
-                ? <img src={picUrl} alt="" />
-                : <div className="drawer-avatar-ph" />}
+              {picUrl ? <img src={picUrl} alt="" /> : <div className="drawer-avatar-ph" />}
             </div>
             <div>
               <p className="drawer-username">@{user?.username}</p>
               <p className="drawer-streak">🔥 {user?.streakCount || 0} day streak</p>
             </div>
           </div>
-          <button className="drawer-close" onClick={onClose}>
-            <X size={20} />
-          </button>
+          <button className="drawer-close" onClick={onClose}><X size={20} /></button>
         </div>
 
         <nav className="drawer-nav">
@@ -52,7 +51,7 @@ export default function SideDrawer({ open, onClose }) {
 
         <div className="drawer-footer">
           <button className="drawer-logout" onClick={handleLogout}>Log Out</button>
-          <span className="drawer-version">Aura v1.6.1</span>
+          <span className="drawer-version">Aura v1.7.0</span>
         </div>
       </aside>
     </>
