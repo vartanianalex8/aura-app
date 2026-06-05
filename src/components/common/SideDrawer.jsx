@@ -51,7 +51,7 @@ export default function SideDrawer({ open, onClose }) {
 
         <div className="drawer-footer">
           <button className="drawer-logout" onClick={handleLogout}>Log Out</button>
-          <span className="drawer-version">Aura v1.7.0</span>
+          <span className="drawer-version">Aura v1.8.0</span>
         </div>
       </aside>
     </>

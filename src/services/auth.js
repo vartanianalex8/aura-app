@@ -34,7 +34,7 @@ async function syncUserIndex(user) {
 }
 
 export const authService = {
-  async signUp(username, email, password) {
+  async signUp(username, email, password, bio = null) {
     const user = new Parse.User();
     user.set('username', username);
     user.set('email', email);
@@ -44,6 +44,7 @@ export const authService = {
     user.set('badges', []);
     user.set('blockedUsers', []);
     user.set('savedPosts', []);
+    if (bio) user.set('bio', bio);
     user.set('lastPostDate', null);
     const result = await user.signUp();
     await syncUserIndex(result);

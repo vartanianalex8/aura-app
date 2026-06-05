@@ -1,4 +1,5 @@
 import Parse from './parse';
+import { streakFreezeService } from './streakFreeze';
 
 const Post = Parse.Object.extend('Post');
 
@@ -103,7 +104,14 @@ export const postService = {
       if (diffDays === 1) {
         user.increment('streakCount');
       } else if (diffDays > 1) {
-        user.set('streakCount', 1);
+        // Try to save streak with a freeze for each missed day (up to 1 freeze covers 1 gap)
+        const freezeUsed = diffDays === 2 ? await streakFreezeService.tryUseFreeze() : false;
+        if (freezeUsed) {
+          user.increment('streakCount'); // streak continues
+          user.set('lastFreezeMessage', 'used'); // signal UI to show toast
+        } else {
+          user.set('streakCount', 1);
+        }
       }
     } else {
       user.set('streakCount', 1);
@@ -259,11 +267,17 @@ export const postService = {
       default: query.descending('createdAt');
     }
 
+    const currentUser = Parse.User.current();
+    const blockedIds = currentUser ? (currentUser.get('blockedUsers') || []) : [];
+
     const results = await query.find();
     if (results.length === 0) return [];
 
-    const currentUser = Parse.User.current();
-    return this._enrichPosts(results, currentUser);
+    const filtered = blockedIds.length
+      ? results.filter(p => !blockedIds.includes(p.get('author')?.id))
+      : results;
+
+    return this._enrichPosts(filtered, currentUser);
   },
 
   async getUserPosts(userId) {

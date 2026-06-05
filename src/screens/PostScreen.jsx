@@ -6,6 +6,18 @@ import { POST_RULES, POST_CATEGORIES } from '../constants/config';
 import { ROUTES } from '../constants/routes';
 import './PostScreen.css';
 
+
+const CATEGORY_SUGGESTIONS = {
+  moment: ['today', 'dailymoment', 'aura', 'life', 'grateful'],
+  food: ['foodie', 'homecooking', 'delicious', 'eats', 'recipe'],
+  nature: ['outdoors', 'nature', 'sky', 'peaceful', 'earthporn'],
+  fitness: ['workout', 'gains', 'gym', 'active', 'health'],
+  creative: ['art', 'design', 'creative', 'handmade', 'diy'],
+  music: ['nowplaying', 'music', 'vibes', 'playlist', 'song'],
+  travel: ['travel', 'explore', 'wanderlust', 'adventure', 'view'],
+  thoughts: ['mindset', 'journal', 'reflection', 'thoughts', 'mindful'],
+};
+
 export default function PostScreen() {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -167,6 +179,14 @@ export default function PostScreen() {
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addHashtag())}
           />
           <button className="tag-add-btn" onClick={addHashtag}>+</button>
+        </div>
+        {/* Suggested tags based on category */}
+        <div className="hashtag-suggestions">
+          {(CATEGORY_SUGGESTIONS[category] || []).filter(s => !hashtags.includes(s)).slice(0, 5).map(s => (
+            <button key={s} className="hashtag-suggestion-chip" onClick={() => {
+              if (!hashtags.includes(s) && hashtags.length < 10) setHashtags(prev => [...prev, s]);
+            }}>+ #{s}</button>
+          ))}
         </div>
         {hashtags.length > 0 && (
           <div className="hashtag-chips">

@@ -299,3 +299,9 @@
   justify-content: center;
   cursor: pointer;
 }
+
+.profile-freeze-badge {
+  font-size: 0.8rem;
+  color: #60a5fa;
+  margin-top: 0.1rem;
+}

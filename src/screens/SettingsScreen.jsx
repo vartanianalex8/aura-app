@@ -146,7 +146,7 @@ export default function SettingsScreen() {
         <h3>About</h3>
         <button className="settings-row" onClick={() => navigate(ROUTES.CHANGELOG)}>📋 Patch Notes</button>
         <button className="settings-row" onClick={() => navigate('/help')}>❓ Help Center</button>
-        <div className="settings-version">Aura v1.7.0</div>
+        <div className="settings-version">Aura v1.8.0</div>
       </section>
 
       {/* Logout */}

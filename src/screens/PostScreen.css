@@ -205,3 +205,25 @@
   gap: 8px;
 }
 .location-row .auth-input { flex: 1; }
+
+/* Hashtag suggestions */
+.hashtag-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+.hashtag-suggestion-chip {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.hashtag-suggestion-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}

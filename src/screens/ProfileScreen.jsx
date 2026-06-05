@@ -9,6 +9,7 @@ import Parse from '../services/parse';
 import { ROUTES } from '../constants/routes';
 import { REACTION_EMOJIS } from '../constants/config';
 import { timeAgo, getTextPostFontSize } from '../utils/helpers';
+import { streakFreezeService } from '../services/streakFreeze';
 import './ProfileScreen.css';
 
 const UserIndex = Parse.Object.extend('UserIndex');
@@ -30,8 +31,16 @@ export default function ProfileScreen() {
   const navigate = useNavigate();
 
   const [profilePicUrl, setProfilePicUrl] = useState(null);
+  const [freezesAvailable, setFreezesAvailable] = useState(0);
 
-  useEffect(() => { loadPosts(); loadSocialCounts(); loadProfilePic(); }, [user]);
+  useEffect(() => {
+    loadPosts();
+    loadSocialCounts();
+    loadProfilePic();
+    streakFreezeService.grantMonthlyFreezeIfDue().then(() => {
+      setFreezesAvailable(streakFreezeService.getFreezesAvailable());
+    }).catch(() => {});
+  }, [user]);
 
   // Fetch profile pic from UserIndex — same reliable path used for all other profiles
   const loadProfilePic = async () => {
@@ -162,6 +171,9 @@ export default function ProfileScreen() {
         <div className="profile-info-block">
           <p className="profile-name">@{user?.username}</p>
           <p className="profile-streak-badge">🔥 {user?.streakCount || 0} day streak · best {user?.longestStreak || 0}</p>
+          {freezesAvailable > 0 && (
+            <p className="profile-freeze-badge">❄️ {freezesAvailable} streak freeze{freezesAvailable !== 1 ? 's' : ''} available</p>
+          )}
           {user?.bio && <p className="profile-bio">{user.bio}</p>}
         </div>
       </div>

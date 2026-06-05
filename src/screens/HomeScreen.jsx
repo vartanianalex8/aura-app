@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { postService } from '../services/posts';
+import { streakFreezeService } from '../services/streakFreeze';
 import { authService } from '../services/auth';
 import PostCard from '../components/feed/PostCard';
 import { useNavigate, useOutletContext } from 'react-router-dom';
@@ -51,6 +52,7 @@ export default function HomeScreen() {
   useEffect(() => {
     postService.cleanupExpiredPosts();
     authService.seedUserIndex().catch(() => {});
+    streakFreezeService.grantMonthlyFreezeIfDue().catch(() => {});
   }, []);
 
   const loadPosts = useCallback(async (reset = false) => {

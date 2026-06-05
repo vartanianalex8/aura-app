@@ -10,6 +10,7 @@ export default function SignupScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [bio, setBio] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
@@ -18,19 +19,15 @@ export default function SignupScreen() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
     const uErr = validateUsername(username);
     if (uErr) return setError(uErr);
-
     const pErr = validatePassword(password);
     if (pErr) return setError(pErr);
-
     if (password !== confirmPassword) return setError('Passwords do not match');
-
     setLoading(true);
     try {
-      await signUp(username, email, password);
-      navigate(ROUTES.HOME);
+      await signUp(username, email, password, bio.trim() || null);
+      navigate('/onboarding', { replace: true });
     } catch (err) {
       setError(err.message || 'Signup failed');
     } finally {
@@ -46,49 +43,30 @@ export default function SignupScreen() {
       <form className="auth-form" onSubmit={handleSubmit}>
         {error && <div className="auth-error">{error}</div>}
 
-        <input
-          className="auth-input"
-          type="text"
-          placeholder="Username (max 15 chars)"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          maxLength={15}
-          required
-        />
-        <input
-          className="auth-input"
-          type="email"
-          placeholder="Email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          className="auth-input"
-          type="password"
-          placeholder="Password (8+ chars, 1 number, 1 special)"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          className="auth-input"
-          type="password"
-          placeholder="Confirm password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
+        <input className="auth-input" type="text" placeholder="Username (max 15 chars)" value={username} onChange={(e) => setUsername(e.target.value)} maxLength={15} required />
+        <input className="auth-input" type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <input className="auth-input" type="password" placeholder="Password (8+ chars, 1 number, 1 special)" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <input className="auth-input" type="password" placeholder="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+
+        <div style={{ position: 'relative' }}>
+          <textarea
+            className="auth-input"
+            placeholder="Bio (optional) — tell people who you are"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            maxLength={150}
+            rows={2}
+            style={{ resize: 'none', paddingBottom: '1.4rem' }}
+          />
+          <span style={{ position: 'absolute', bottom: '0.5rem', right: '0.75rem', fontSize: '11px', color: 'var(--text-muted)' }}>{bio.length}/150</span>
+        </div>
 
         <button className="auth-btn" type="submit" disabled={loading}>
           {loading ? 'Creating account...' : 'Sign Up'}
         </button>
 
         <div className="auth-divider">or</div>
-
-        <p className="auth-link">
-          Already have an account? <Link to={ROUTES.LOGIN}>Log In</Link>
-        </p>
+        <p className="auth-link">Already have an account? <Link to={ROUTES.LOGIN}>Log In</Link></p>
       </form>
     </div>
   );

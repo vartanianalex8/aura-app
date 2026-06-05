@@ -21,6 +21,7 @@ import LeaderboardScreen from './screens/LeaderboardScreen';
 import RecapScreen from './screens/RecapScreen';
 import HelpScreen from './screens/HelpScreen';
 import BlockedUsersScreen from './screens/BlockedUsersScreen';
+import OnboardingScreen from './screens/OnboardingScreen';
 import './styles/global.css';
 
 class ErrorBoundary extends Component {
@@ -77,6 +78,7 @@ function AppRoutes() {
         <Route path="/recap" element={<RecapScreen />} />
         <Route path="/help" element={<HelpScreen />} />
         <Route path="/blocked" element={<BlockedUsersScreen />} />
+        <Route path="/onboarding" element={<OnboardingScreen />} />
       </Route>
     </Routes>
   );

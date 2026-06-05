@@ -4,6 +4,21 @@ import './ChangelogScreen.css';
 
 const VERSIONS = [
   {
+    version: '1.8.0',
+    date: 'June 2026',
+    title: 'The Polish Update',
+    changes: [
+      { type: 'new', text: 'Threaded replies — tap Reply on any comment to respond directly; tap to expand thread' },
+      { type: 'new', text: 'Streak Freezes — 1 free freeze granted every month; a freeze auto-saves your streak if you miss exactly one day' },
+      { type: 'new', text: 'Freeze balance shown on your profile (❄️ badge)' },
+      { type: 'new', text: 'Bio field on signup — no need to edit profile after creating your account' },
+      { type: 'new', text: 'Hashtag suggestions on post creation — tap to add suggested tags based on your category' },
+      { type: 'new', text: 'Onboarding flow for new users — 5-slide walkthrough explaining core Aura concepts' },
+      { type: 'improved', text: 'Blocked users now filtered from For You feed in real time' },
+      { type: 'improved', text: 'Comment section redesigned with threaded structure and reply banner' },
+    ],
+  },
+  {
     version: '1.7.0',
     date: 'June 2026',
     title: 'The Safety & Insight Update',

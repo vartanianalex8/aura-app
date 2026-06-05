@@ -148,3 +148,16 @@
   color: var(--text-muted);
   padding: 12px 0;
 }
+
+/* Threaded reply styles */
+.comment-main { display: flex; flex-direction: column; gap: 0.2rem; }
+.comment-bubble { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: baseline; }
+.comment-meta-row { display: flex; align-items: center; gap: 0.75rem; padding-left: 0.1rem; }
+.comment-reply-btn { background: none; border: none; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; padding: 0; font-weight: 500; }
+.comment-reply-btn:hover { color: var(--accent); }
+.comment-show-replies-btn { background: none; border: none; color: var(--accent); font-size: 0.75rem; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 0.25rem; font-weight: 500; }
+.comment-replies { margin-left: 1.25rem; border-left: 2px solid var(--border); padding-left: 0.75rem; margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.5rem; }
+.comment-item--reply { padding: 0.3rem 0; }
+.comment-reply-banner { display: flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.75rem; background: var(--surface); border-radius: 8px; margin-bottom: 0.4rem; font-size: 0.8rem; color: var(--text-secondary); }
+.comment-reply-banner strong { color: var(--text-primary); }
+.comment-reply-cancel { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; padding: 0; margin-left: auto; line-height: 1; }

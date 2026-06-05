@@ -32,8 +32,8 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const signUp = async (username, email, password) => {
-    const u = await authService.signUp(username, email, password);
+  const signUp = async (username, email, password, bio = null) => {
+    const u = await authService.signUp(username, email, password, bio);
     setUser(u);
     return u;
   };
